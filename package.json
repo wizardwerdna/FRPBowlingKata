@@ -1,31 +1,56 @@
 {
-  "name": "tswp",
+  "name": "seed",
   "version": "1.0.0",
-  "description": "",
+  "description": "Seed for webpack",
   "main": "app.js",
   "dependencies": {
-    "es6-shim": "^0.35.0",
+    "@cycle/dom": "^10.0.2",
+    "@cycle/rxjs-run": "^3.0.2",
+    "@cycle/xstream-run": "^3.0.3",
     "jquery": "^2.2.4",
-    "rxjs": "^5.0.0-beta.8",
-    "whatwg-fetch": "^1.0.0"
+    "es6-shim": "^0.35.0",
+    "whatwg-fetch": "^1.0.0",
+    "rxjs": "^5.0.0-beta.9",
+    "xstream": "^5.0.6"
   },
   "devDependencies": {
-    "bootstrap-loader": "^1.0.10",
     "bootstrap-sass": "^3.3.6",
-    "css-loader": "^0.23.1",
+    "cpy": "^4.0.1",
+    "cpy-cli": "^1.0.1",
+    "rimraf": "^2.5.2",
     "file-loader": "^0.8.5",
     "node-sass": "^3.7.0",
+    "npm-run-all": "^2.3.0",
+    "bootstrap-loader": "^1.0.10",
+    "css-loader": "^0.23.1",
     "resolve-url-loader": "^1.4.3",
     "sass-loader": "^3.2.0",
     "style-loader": "^0.13.1",
     "ts-loader": "^0.8.2",
-    "typescript": "^1.8.10",
     "url-loader": "^0.5.7",
-    "webpack": "^1.13.0"
+    "typescript": "^1.8.10",
+    "webpack": "^2.1.0-beta.15",
+    "webpack-dev-server": "^2.1.0-beta.0",
+    "webpack-validator": "^2.2.2"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Using browser test suite\" && exit 1",
+    "watch:test": "npm test -- --auto-watch --no-single-run",
+    "validate": "npm-run-all --parallel validate-webpack:* lint",
+    "validate-webpack:dev": "webpack-validator webpack.config.js --env.dev",
+    "validate-webpack:prod": "webpack-validator webpack.config.js --env.prod",
+    "clean-dist": "rimraf -rf dist/*",
+    "copy-files": "cpy src/index.html src/*.png dist",
+    "clean-and-copy": "npm run clean-dist && npm run copy-files",
+    "prestart": "npm run clean-and-copy",
+    "start": "webpack-dev-server --env.dev --content-base dist",
+    "prebuild": "npm run clean-and-copy",
+    "prebuild:prod": "npm run clean-and-copy",
+    "build": "webpack --env.dev",
+    "build:prod": "webpack --env.prod -p",
+    "lint": "tslint src/**/*.ts",
+    "setup": "npm install && typings install && npm run validate"
   },
-  "author": "",
-  "license": "ISC"
+  "author": "Andrew Clifford Greenberg wizardwerdna@gmail.com",
+  "license": "MIT"
 }

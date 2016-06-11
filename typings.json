@@ -1,0 +1,8 @@
+{
+  "name": "tswp",
+  "globalDependencies": {
+    "jquery": "github:DefinitelyTyped/DefinitelyTyped/jquery/jquery.d.ts#6d0e826824da52204c1c93f92cecbc961ac84fa9",
+    "es6-shim": "github:DefinitelyTyped/DefinitelyTyped/es6-shim/es6-shim.d.ts#6052959591c9bc6f8463c58220965c7030ba934d",
+    "whatwg-fetch": "github:DefinitelyTyped/DefinitelyTyped/whatwg-fetch/whatwg-fetch.d.ts#6052959591c9bc6f8463c58220965c7030ba934d"
+  }
+}

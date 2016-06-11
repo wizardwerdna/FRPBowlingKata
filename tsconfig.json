@@ -3,7 +3,7 @@
     "noImplicitAny" : false
   },
   "files": [
-    "app.ts",
-    "typings/tsd.d.ts"
+    "src/app.ts",
+    "typings/index.d.ts"
   ]
 }
