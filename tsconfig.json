@@ -1,0 +1,9 @@
+{
+  "compilerOptions": {
+    "noImplicitAny" : false
+  },
+  "files": [
+    "app.ts",
+    "typings/tsd.d.ts"
+  ]
+}
