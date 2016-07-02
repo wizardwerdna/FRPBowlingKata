@@ -43,7 +43,7 @@
     "copy-files": "cpy src/index.html src/*.png dist",
     "clean-and-copy": "npm run clean-dist && npm run copy-files",
     "prestart": "npm run clean-and-copy",
-    "start": "webpack-dev-server --env.dev --content-base dist",
+    "start": "webpack-dev-server --env.dev --content-base dist --inline --hot",
     "prebuild": "npm run clean-and-copy",
     "prebuild:prod": "npm run clean-and-copy",
     "build": "webpack --env.dev",
