@@ -1,6 +1,7 @@
 {
   "compilerOptions": {
-    "noImplicitAny" : false
+    "noImplicitAny" : false,
+    "sourceMap": true
   },
   "files": [
     "src/app.ts",
