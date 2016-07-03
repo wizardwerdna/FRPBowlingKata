@@ -1,2 +1,2 @@
-console.clear();
+console.error('app.ts has no code');
 
