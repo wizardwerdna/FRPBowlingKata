@@ -1,3 +1,5 @@
+import {Observable} from 'rxjs';
+
 export function testSuite () {
   test('should know the truth', function(){
     assertEqual(true, true);
@@ -11,6 +13,31 @@ const data = {
   error :  0,
   nest :  0,
 };
+
+export function str2mbl$(stream$: Observable<any>): Observable<string> {
+  return stream$
+    .defaultIfEmpty('')
+    .reduce((acc, item) => acc  + '-' + item.toString())
+    .map(mbl => '-' + mbl + '|');
+}
+
+export function mbl2str$(mbl: string): Observable<any> {
+  return Observable.from(
+    mbl
+      .replace(/--+/g, '-')
+      .replace(/[ |]/g, '')
+      .replace(/^[ |-]+/, '')
+      .replace(/[ |-]+$/, '')
+      .split('-')
+      .map(each => isNaN(parseInt(each)) ? each : parseInt(each))
+  );
+}
+
+export function assertMarble(expected: string, str$: Observable<any>) {
+  str2mbl$(str$).subscribe(
+    actual => assertEqual(expected, actual)
+  );
+}
 
 export function assertEqual(expected, value) {
   data.run++;
