@@ -29,24 +29,64 @@ export function mbl2str$(mbl: string): Observable<any> {
       .replace(/^[ |-]+/, '')
       .replace(/[ |-]+$/, '')
       .split('-')
+      .filter(each => each !== '')
       .map(each => isNaN(parseInt(each)) ? each : parseInt(each))
   );
 }
 
 export function assertMarble(expected: string, str$: Observable<any>) {
+  data.run++;
   str2mbl$(str$).subscribe(
-    actual => assertEqual(expected, actual)
+    actual => {
+      if (expected === actual) {
+        console.info('%cstream has expected marble diagram (%o)',
+          'color: green', expected);
+        data.passed++;
+      } else {
+        console.error('stream marble diagram (%o) is NOT as expected (%o)',
+          actual, expected);
+        data.failed++;
+      }
+    },
+    err => {
+      console.error('Error:', err);
+      data.error++;
+    }
   );
 }
 
-export function assertEqual(expected, value) {
+export function expect(actual) {
+  return {
+    toBe: expected => assertIdentical(expected, actual),
+    toEqual: expected => assertEqual(expected, actual),
+    toMarble: expected => assertMarble(expected, actual)
+  };
+}
+
+export function assertIdentical(expected, actual) {
   data.run++;
   try {
-    if (JSON.stringify(expected) === JSON.stringify(value)) {
-      console.info('%cexpected value %o was returned', 'color: green', expected);
+    if (expected === actual) {
+      console.info('%cactual  === expected (%o)', 'color: green', expected);
       data.passed++;
     } else {
-      console.error('expected %o, but got %o', expected, value);
+      console.error('%o !== expected %o', actual, expected);
+      data.failed++;
+    }
+  } catch (err) {
+    console.error('Error:', err);
+    data.error++;
+  }
+}
+
+export function assertEqual(expected, actual) {
+  data.run++;
+  try {
+    if (JSON.stringify(expected) === JSON.stringify(actual)) {
+      console.info('%cactual is equal to expected (%o)', 'color: green', expected);
+      data.passed++;
+    } else {
+      console.error('%o is NOT equal to expected %o', actual, expected);
       data.failed++;
     }
   } catch (err) {
@@ -62,7 +102,12 @@ export function test(testName, tests, isOpen = true) {
   } else {
     console.groupCollapsed(testName);
   }
-  tests();
+  try {
+    tests();
+  } catch (err) {
+    console.error('Error Runing Test:', err);
+    data.error++;
+  }
   console.groupEnd();
   data.nest--;
   if (data.nest === 0) {

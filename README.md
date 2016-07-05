@@ -8,7 +8,7 @@ in the browser console.
 <center><img src="https://raw.githubusercontent.com/wizardwerdna/FRPBowlingKata/master/Display.png" width="600px"></center>
 
 The purpose is to demonstrate how to use Test First Development to execute the
-[Classical Bowling Katah](http://codingdojo.org/cgi-bin/index.pl?KataBowling).
+[Classical Bowling Kata](http://codingdojo.org/cgi-bin/index.pl?KataBowling).
 This Kata varies from he Classical Kata, in that the scoring program can handle
 partial games and will properly score partial strikes and spares.
 
