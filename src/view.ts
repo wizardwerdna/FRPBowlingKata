@@ -1,4 +1,4 @@
-import {hr, button, img, span, h1, h3, div} from '@cycle/dom';
+import {a, hr, button, img, span, h1, h3, h5, div} from '@cycle/dom';
 import {enabler} from './enabler';
 require('./styles.css');
 require('./Rx_Logo_S.png');
@@ -39,7 +39,12 @@ export function view(model$) {
           ])
         ),
       ]),
-      hr()
+      hr(),
+      div('#footer',[
+        a({props: {href: 'https://github.com/wizardwerdna/FRPBowlingKata'}}, [
+          h5('Link to Github Repository')
+        ])
+      ])
     ])
   );
 };

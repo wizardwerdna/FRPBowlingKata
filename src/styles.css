@@ -12,6 +12,11 @@ body {background-color: #eaeaea;}
   text-align: center;
 }
 
+#footer {
+  padding-left: 2pc;
+  text-align: center;
+}
+
 #title span {
   padding-left: 0.5pc;
   padding-right: 0.5pc;
