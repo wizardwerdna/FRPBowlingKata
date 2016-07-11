@@ -1,5 +1,22 @@
 body {background-color: #eaeaea;}
 
+.container {
+  margin: 2pc auto;
+  width: 550px;
+  outline: 3px solid brown;
+  padding: 1pc;
+}
+
+#title {
+  padding-left: 2pc;
+  text-align: center;
+}
+
+#title span {
+  padding-left: 0.5pc;
+  padding-right: 0.5pc;
+}
+
 img {
   height: 40px;
   width:  40px;
@@ -14,14 +31,29 @@ button {
   margin: 1pt;
 }
 
-button:disabled {
-  background-color: lightGray;
-}
-
 button#newgame {
   background-color: red;
   width: 100px;
   padding: 3px;
+}
+button#newgame:disabled {background-color: lightgray}
+
+button#undo {
+  background-color: orange;
+  width: 100px;
+  padding: 3px;
+}
+button#undo:disabled {background-color: lightgray}
+
+button#redo {
+  background-color: green;
+  width: 100px;
+  padding: 3px;
+}
+button#redo:disabled {background-color: lightgray}
+
+button:disabled {
+  background-color: lightgray;
 }
 
 .frames{

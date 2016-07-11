@@ -1,3 +1,5 @@
+THIS IS OUT OF DATE AND DOES NOT FOLLOW THE SCREENCASTS OR THE CODE
+
 # FRP Bowling Kata
 
 This repository contains a responsive functional application using Cycle.js and
@@ -28,9 +30,10 @@ bash
 ```bash
 git clone git@github.com:wizardwerdna/FRPBowlingKata.git
 cd FRPBowlingKata
-npm install && tsd install
-webpack-dev-server
+npm run setup
+npm start
 ```
+Then open your browser to http://localhost:8080/
 # Developing the Scorer$ function
 
 We will first drive out the development of a function, `scorer$` which takes as
