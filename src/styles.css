@@ -12,9 +12,29 @@ body {background-color: #eaeaea;}
   text-align: center;
 }
 
+#title a {
+  text-decoration: none;
+  padding-left: 1pc;
+  padding-right: 1pc;
+}
+
+#title a:visited {
+  color: black;
+}
+
 #footer {
   padding-left: 2pc;
-  text-align: center;
+  text-align: right;
+  font-size: small;
+}
+
+#footer a {
+  text-decoration: none;
+}
+
+#footer a:hover {
+  color: white;
+  background-color: green;
 }
 
 #title span {

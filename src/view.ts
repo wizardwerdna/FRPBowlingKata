@@ -9,7 +9,10 @@ export function view(model$) {
       div('#title', [
         h1([
           img({props: {src: 'Rx_Logo_S.png'}}),
-          span('FRP Bowling'),
+          a(
+            {props: {href: 'https://github.com/wizardwerdna/FRPBowlingKata'}},
+            'FRP Bowling'
+          ),
           img({props: {src: 'CycleJS_Logo.png'}}),
         ]),
         h3('The Classic Kata in RxJS and CycleJS')
@@ -40,10 +43,10 @@ export function view(model$) {
         ),
       ]),
       hr(),
-      div('#footer', [
-        a({props: {href: 'https://github.com/wizardwerdna/FRPBowlingKata'}}, [
-          h5('Link to Github Repository')
-        ])
+      div('#footer', {props: {style: 'font-size: small'}}, [
+        a('.footlink', {props: {href: 'https://github.com/wizardwerdna/FRPBowlingKata'}}, 'FRP Bowling'),
+        span(' built by '),
+        a('.footlinke', {props: {href: 'mailto:wizardwerdna@gmail.com'}}, 'Andrew C. Greenberg')
       ])
     ])
   );
