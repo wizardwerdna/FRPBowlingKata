@@ -124,3 +124,662 @@ mbl2str$(marble_diagram)
 
 This returns a stream corresponding to the ASCII marble diagram.  The stream is treated synchronously, giving no meaning to each '-', except as a separator of
 the elements presented.  Thus `mbl2str$('--a-b--c--|')` is the same stream as `mbl2str$('-a-b-c|')`;
+
+## Development of the `scorer$`
+
+### The Empty Game
+```typescript
+test('empty', testScore('-|', '-|'));
+
+function testScore(rolls, expected) {
+  return function () {
+    const rolls$ = mbl2str$(rolls);
+    expect(scorer$(rolls$)).toMarble(expected);
+  };
+}
+```
+
+and we are <span style="color: red">red</span>!
+
+
+```typescript
+return Observable.empty();
+```
+
+and we are <span style="color: green">green</span>, then we <span style="color: orange">refactor</span>!
+
+### Gutter Ball
+```typescript
+test('gutter', testScore('-0|', '-0|'));
+```
+
+and we are <span style="color: red">red</span>!
+
+
+```typescrtipt
+return roll$
+```
+
+and we are <span style="color: green">green</span>, then we <span style="color: orange">refactor</span>!
+
+
+### Open Frame I
+```typescript
+test('open', testScore('-0-0|', '-0|'));
+```
+
+and we are <span style="color: red">red</span>!
+
+
+```typescrtipt
+return roll$.take(1)
+```
+
+and we are <span style="color: green">green</span>, then we <span style="color: orange">refactor</span>!
+
+
+### Open Frame II
+```typescript
+test('open', testScore('-0-1|', '-1|'));
+```
+
+and we are <span style="color: red">red</span>!
+
+
+```typescrtipt
+return roll$.takeLast(1)
+```
+
+and we are <span style="color: green">green</span>, then we <span style="color: orange">refactor</span>!
+
+
+### Open Frame III
+```typescript
+test('open', testScore('-1-1|', '-2|'));
+```
+
+and we are <span style="color: red">red</span>!
+
+
+```typescript
+const sum = (acc, curr) => acc + curr;
+return roll$.reduce(sum);
+```
+
+and we are <span style="color: green">green</span>, then we <span style="color: orange">refactor</span>!
+
+
+### Two Open Frames I
+```typescript
+test('two open', testScore('-0-0-1-1|', '-0-2|'));
+```
+
+and we are <span style="color: red">red</span>!
+
+
+```typescript
+const frameScorer = frame =>
+  frame.reduce(sum); 
+return roll$
+  .windowCount(2)
+  .mergeMap(frameScorer);
+```
+
+and we are <span style="color: green">green</span>, then we <span style="color: orange">refactor</span>!
+
+
+### Two Open Frames II
+```typescript
+test('two open', testScore('-1-1-2-2|', '-2-6|'));
+```
+
+and we are <span style="color: red">red</span>!
+
+
+```typescript
+return roll$
+  .windowCount(2)
+  .mergeMap(frameScorer);
+  .scan(sum);
+```
+
+and we are <span style="color: green">green</span>, then we <span style="color: orange">refactor</span>!
+
+
+### Spare I
+```typescript
+test('spare', testScore('-5-5-5|', '-15-20|'));
+```
+
+and we are <span style="color: red">red</span>!
+
+
+```typescript
+const frameScorer = frame =>
+  frame.reduce((acc, curr) =>
+    acc + curr === 10 ?
+      acc + curr + 5 :
+      acc + curr
+  );
+```
+
+and we are <span style="color: green">green</span>, then we <span style="color: orange">refactor</span>!
+
+
+### Spare II
+```typescript
+test('spare', testScore('-5-5-9|', '-19-28|'));
+```
+
+and we are <span style="color: red">red</span>!
+
+
+```typescript
+...
+const frameScorer = frame =>
+  frame.reduce((acc, curr) =>
+    curr[0] + curr[1] ?
+      curr.reduce(sum) :
+      curr[0] + (curr[1] || 0)
+  );
+...
+return roll$
+  .bufferCount(3, 1);
+  .windowCount(2)
+  .mergeMap(frameScorer);
+  .scan(sum);
+```
+
+and we are <span style="color: green">green</span>, then we <span style="color: orange">refactor</span>!
+
+
+### Strike
+```typescript
+test('strike', testScore('-10-1-2|', '-13-16|'));
+```
+
+and we are <span style="color: red">red</span>!
+
+
+```typescript
+...
+const isStrike = (curr) => curr[0] === 10;
+
+const frameMarker = (acc, curr) => (
+  acc.lastRoll && isSrike(curr) ?
+    { pins: curr, frame: acc.frame + 1, lastRoll: true }
+    {
+      pins: curr,
+      frame: acc.lastRoll ? acc.frame + 1 : acc.frame,
+      lastRoll: !acc.lastRoll
+    }
+)
+
+...
+return roll$
+  .bufferCount(3, 1)
+  .scan(frameMarker)
+  .groupBy(m => m.frame, m => m.pins)
+  .mergeMap(frameScorer);
+  .scan(sum);
+```
+
+and we are <span style="color: green">green</span>, then we <span style="color: orange">refactor</span>!
+
+
+### Partial Spare
+```typescript
+test('partial spare', testScore('-5-5|', '-|'));
+```
+
+and we are <span style="color: red">red</span>!
+
+
+```typescript
+return roll$
+  .bufferCount(3, 1)
+  .map(trip => trip.concat(NaN, NaN).slice(0, 3))
+  .scan(frameMarker)
+  .groupBy(m => m.frame, m => m.pins)
+  .mergeMap(frameScorer);
+  .scan(sum)
+  .filter(score => !isNaN(score))
+```
+
+and we are <span style="color: green">green</span>, then we <span style="color: orange">refactor</span>!
+
+### Spare Game
+```typescript
+test('spare game', testScore(
+  '-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5|',
+  '-15-30-45-60-75-90-105-120-135-150|'
+));
+```
+
+and we are <span style="color: red">red</span>!
+
+```typescript
+return roll$
+  ...
+  .take(10);
+```
+
+and we are <span style="color: green">green</span>, then we <span style="color: orange">refactor</span>!
+
+```typescript
+roll$
+  .let(makeFrames)
+  .let(scoreFrames)
+  .let(cleanPartials);
+
+function makeFrames(roll$) {
+  return roll$
+    .bufferCount(3, 1)
+    .map(trip => trip.concat(NaN, NaN).slice(0, 3))
+    .scan(frameMarker)
+    .groupBy(m => m.frame, m => m.pins)
+}
+
+function scoreFrames(frame$) {
+  return frame$
+    .mergeMap(frameScorer);
+    .scan(sum)
+}
+
+function cleanPartials(score$) {
+  return score$  
+    .filter(score => !isNaN(score))
+    .take(1)
+}
+
+```
+
+## Development of the `displayer$`
+
+TO BE DONE
+
+### The Empty Game
+```javascript
+  test('empty', testDisplay('-|', ''));
+  function testDisplay(rolls, expected) {
+    return function() {
+      const roll$ = mbl2str$(rolls);
+      expect(displayer$(roll$)).toBeStreamOf(expected);
+    };
+  }
+```
+and we are <span style="color: red">red</span>!
+```typescript
+SOLUTION GOES HERE
+```
+and we are <span style="color: green">green</span>, then we <span style="color: orange">refactor</span>!
+
+### One Gutter Ball
+```javascript
+  test('gutter', testDisplay('-0|', '-'));
+```
+and we are <span style="color: red">red</span>!
+```typescript
+SOLUTION GOES HERE
+```
+and we are <span style="color: green">green</span>, then we <span style="color: orange">refactor</span>!
+
+### One Strike
+```javascript
+  test('strike', testDisplay('-10|', ' X'));
+```
+and we are <span style="color: red">red</span>!
+```typescript
+SOLUTION GOES HERE
+```
+and we are <span style="color: green">green</span>, then we <span style="color: orange">refactor</span>!
+
+### One Non-gutter, Non-strike Roll I
+```javascript
+  test('other', testDisplay('-1|', '1'));
+```
+and we are <span style="color: red">red</span>!
+```typescript
+SOLUTION GOES HERE
+```
+and we are <span style="color: green">green</span>, then we <span style="color: orange">refactor</span>!
+
+### One Non-gutter, Non-strike Roll II
+```javascript
+  test('other', testDisplay('-9|', '9'));
+```
+and we are <span style="color: red">red</span>!
+```typescript
+SOLUTION GOES HERE
+```
+and we are <span style="color: green">green</span>, then we <span style="color: orange">refactor</span>!
+
+### Two Rolls
+```javascript
+  test('two rolls', testDisplay('-0-9|', '-9'));
+```
+and we are <span style="color: red">red</span>!
+```typescript
+SOLUTION GOES HERE
+```
+and we are <span style="color: green">green</span>, then we <span style="color: orange">refactor</span>!
+
+### One Spare
+```javascript
+  test('spare', testDisplay('-5-5|', '5/'));
+```
+and we are <span style="color: red">red</span>!
+```typescript
+SOLUTION GOES HERE
+```
+and we are <span style="color: green">green</span>, then we <span style="color: orange">refactor</span>!
+
+### Tenth Frame: Non-Strike
+```javascript
+  test('tenth frame', function() {
+    const preRolls = '-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0';
+    const preDisplay = '------------------';
+    test('spare', testDisplay(preRolls + '-0-10|', preDisplay + '-/'));
+```
+and we are <span style="color: red">red</span>!
+```typescript
+SOLUTION GOES HERE
+```
+and we are <span style="color: green">green</span>, then we <span style="color: orange">refactor</span>!
+
+### Tenth Frame: Spare/Non
+```javascript
+    test('spare/non', testDisplay(preRolls + '-0-10-0|', preDisplay + '-/-'));
+```
+and we are <span style="color: red">red</span>!
+```typescript
+SOLUTION GOES HERE
+```
+and we are <span style="color: green">green</span>, then we <span style="color: orange">refactor</span>!
+
+
+### Tenth Frame: Spare/Strike
+```javascript
+    test('spare/strike', testDisplay(preRolls + '-0-10-10|', preDisplay + '-/X'));
+```
+and we are <span style="color: red">red</span>!
+```typescript
+SOLUTION GOES HERE
+```
+and we are <span style="color: green">green</span>, then we <span style="color: orange">refactor</span>!
+
+### Tenth Frame: Strike
+```javascript
+    test('strike', testDisplay(preRolls + '-10|', preDisplay + 'X'));
+```
+and we are <span style="color: red">red</span>!
+```typescript
+SOLUTION GOES HERE
+```
+and we are <span style="color: green">green</span>, then we <span style="color: orange">refactor</span>!
+
+### Tenth Frame: Strike/Non
+```javascript
+    test('strike/non', testDisplay(preRolls + '-10-0|', preDisplay + 'X-'));
+```
+and we are <span style="color: red">red</span>!
+```typescript
+SOLUTION GOES HERE
+```
+and we are <span style="color: green">green</span>, then we <span style="color: orange">refactor</span>!
+
+### Tenth Frame: Open
+```javascript
+    test('strike/open', testDisplay(preRolls + '-10-0-0|', preDisplay + 'X--'));
+```
+and we are <span style="color: red">red</span>!
+```typescript
+SOLUTION GOES HERE
+```
+and we are <span style="color: green">green</span>, then we <span style="color: orange">refactor</span>!
+
+### Tenth Frame: Strike/Spare
+```javascript
+    test('strike/spare', testDisplay(preRolls + '-10-0-10|', preDisplay + 'X-/'));
+```
+and we are <span style="color: red">red</span>!
+```typescript
+SOLUTION GOES HERE
+```
+and we are <span style="color: green">green</span>, then we <span style="color: orange">refactor</span>!
+
+### Tenth Frame: Double
+```javascript
+    test('double', testDisplay(preRolls + '-10-10|', preDisplay + 'XX'));
+```
+and we are <span style="color: red">red</span>!
+```typescript
+SOLUTION GOES HERE
+```
+and we are <span style="color: green">green</span>, then we <span style="color: orange">refactor</span>!
+
+### Tenth Frame: Turkey
+```javascript
+    test('turkey', testDisplay(preRolls + '-10-10-10|', preDisplay + 'XXX'));
+  });
+```
+and we are <span style="color: red">red</span>!
+
+```typescript
+SOLUTION GOES HERE
+```
+and we are <span style="color: green">green</span>, then we <span style="color: orange">refactor</span>!
+
+## Development of the `enabler`
+
+TO BE DONE
+
+### The Empty Game
+```javascript
+test('empty', testEnable('', [], 10));
+  function testEnable(display, scores, expected) {
+    return () => expect(enabler(display, scores)).toBe(expected);
+  }
+}
+```
+and we are <span style="color: red">red</span>!
+```typescript
+SOLUTION GOES HERE
+```
+and we are <span style="color: green">green</span>, then we <span style="color: orange">refactor</span>!
+
+### One Gutter Ball
+```javascript
+  test('gutter', testEnable('-', [0], 10));
+```
+and we are <span style="color: red">red</span>!
+```typescript
+SOLUTION GOES HERE
+```
+and we are <span style="color: green">green</span>, then we <span style="color: orange">refactor</span>!
+
+### Non-Gutter Ball
+```javascript
+  test('other', testEnable('4', [4], 6));
+```
+and we are <span style="color: red">red</span>!
+```typescript
+SOLUTION GOES HERE
+```
+and we are <span style="color: green">green</span>, then we <span style="color: orange">refactor</span>!
+
+### Open Frame
+```javascript
+  test('open', testEnable('44', [8], 10));
+```
+and we are <span style="color: red">red</span>!
+```typescript
+SOLUTION GOES HERE
+```
+and we are <span style="color: green">green</span>, then we <span style="color: orange">refactor</span>!
+
+### Spare
+```javascript
+  test('spare', testEnable('4/', [], 10));
+```
+and we are <span style="color: red">red</span>!
+```typescript
+SOLUTION GOES HERE
+```
+and we are <span style="color: green">green</span>, then we <span style="color: orange">refactor</span>!
+
+### Spare / Other
+``javascript
+  test('spare/other', testEnable('4/4', [], 6));
+```
+and we are <span style="color: red">red</span>!
+```typescript
+SOLUTION GOES HERE
+```
+and we are <span style="color: green">green</span>, then we <span style="color: orange">refactor</span>!
+
+### Tenth Frame: Gutter Ball
+```javascript
+  test('tenth frame', function() {
+    const preDisplay = '------------------';
+    const preScores = [0, 0, 0, 0, 0, 0, 0, 0, 0];
+    test('gutter', testEnable(preDisplay + '-', preScores.concat(0), 10));
+```
+and we are <span style="color: red">red</span>!
+```typescript
+SOLUTION GOES HERE
+```
+and we are <span style="color: green">green</span>, then we <span style="color: orange">refactor</span>!
+
+### Tenth Frame: Non-Gutter Ball
+```javascript
+    test('other', testEnable(preDisplay + '3', preScores.concat(3), 7));
+```
+and we are <span style="color: red">red</span>!
+```typescript
+SOLUTION GOES HERE
+```
+and we are <span style="color: green">green</span>, then we <span style="color: orange">refactor</span>!
+
+### Tenth Frame: Open Frame
+```javascript
+    test('open', testEnable(preDisplay + '34', preScores.concat(7), -1));
+```
+and we are <span style="color: red">red</span>!
+```typescript
+SOLUTION GOES HERE
+```
+and we are <span style="color: green">green</span>, then we <span style="color: orange">refactor</span>!
+
+### Tenth Frame: Partial Spare
+```javascript
+    test('partial spare', testEnable(preDisplay + '3/', preScores, 10));
+```
+and we are <span style="color: red">red</span>!
+```typescript
+SOLUTION GOES HERE
+```
+and we are <span style="color: green">green</span>, then we <span style="color: orange">refactor</span>!
+
+### Tenth Frame: Complete Spare
+```javascript
+    test('complete spare', testEnable(
+      preDisplay + '3/2', preScores.concat(12), -1));
+```
+and we are <span style="color: red">red</span>!
+```typescript
+SOLUTION GOES HERE
+```
+and we are <span style="color: green">green</span>, then we <span style="color: orange">refactor</span>!
+
+### Tenth Frame: Strike
+```javascript
+    test('strike', testEnable(preDisplay + 'X', preScores, 10));
+```
+and we are <span style="color: red">red</span>!
+```typescript
+SOLUTION GOES HERE
+```
+and we are <span style="color: green">green</span>, then we <span style="color: orange">refactor</span>!
+
+### Tenth Frame: Strike/Gutter
+```javascript
+    test('strike/gutter', testEnable(preDisplay + 'X-', preScores, 10));
+```
+and we are <span style="color: red">red</span>!
+```typescript
+SOLUTION GOES HERE
+```
+and we are <span style="color: green">green</span>, then we <span style="color: orange">refactor</span>!
+
+### Tenth Frame: Strike / Other
+```javascript
+    test('strike/other', testEnable(preDisplay + 'X3', preScores, 7));
+```
+and we are <span style="color: red">red</span>!
+```typescript
+SOLUTION GOES HERE
+```
+and we are <span style="color: green">green</span>, then we <span style="color: orange">refactor</span>!
+
+### Tenth Frame: Strike / Open
+```javascript
+    test('strike/open', testEnable(preDisplay + 'X34', preScores.concat(13), -1));
+```
+and we are <span style="color: red">red</span>!
+```typescript
+SOLUTION GOES HERE
+```
+and we are <span style="color: green">green</span>, then we <span style="color: orange">refactor</span>!
+
+### Tenth Frame: Strike / Spare
+```javascript
+    test('strike/spare', testEnable(preDisplay + 'X3/', preScores.concat(20), -1));
+```
+and we are <span style="color: red">red</span>!
+```typescript
+SOLUTION GOES HERE
+```
+and we are <span style="color: green">green</span>, then we <span style="color: orange">refactor</span>!
+
+### Tenth Frame: Double
+```javascript
+    test('double', testEnable(preDisplay + 'XX', preScores, 10));
+```
+and we are <span style="color: red">red</span>!
+```typescript
+SOLUTION GOES HERE
+```
+and we are <span style="color: green">green</span>, then we <span style="color: orange">refactor</span>!
+
+### Tenth Frame: Double / Gutter
+```javascript
+    test('double/gutter', testEnable(
+      preDisplay + 'XX-', preScores.concat(20), -1));
+```
+and we are <span style="color: red">red</span>!
+```typescript
+SOLUTION GOES HERE
+```
+and we are <span style="color: green">green</span>, then we <span style="color: orange">refactor</span>!
+
+### Tenth Frame: Double / Other
+```javascript
+    test('double/other', testEnable(preDisplay + 'XX3', preScores.concat(23), -1));
+```
+and we are <span style="color: red">red</span>!
+```typescript
+SOLUTION GOES HERE
+```
+and we are <span style="color: green">green</span>, then we <span style="color: orange">refactor</span>!
+
+### Tenth Frame: Turkey
+```javascript
+    test('turkey', testEnable(preDisplay + 'XXX', preScores.concat(30), -1));
+```
+and we are <span style="color: red">red</span>!
+
+```typescript
+SOLUTION GOES HERE
+```
+and we are <span style="color: green">green</span>, then we <span style="color: orange">refactor</span>!
