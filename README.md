@@ -8,10 +8,13 @@ in the browser console.
 
 <center><img src="https://raw.githubusercontent.com/wizardwerdna/FRPBowlingKata/master/Display.png" width="600px"></center>
 
+[Click here for a running version of the FRP Bowling application](http://wizardwerdna.github.io).
+
 The purpose is to demonstrate how to use Test First Development to execute the
 [Classical Bowling Kata](http://codingdojo.org/cgi-bin/index.pl?KataBowling).
 This Kata varies from he Classical Kata, in that the scoring program can handle
 partial games and will properly score partial strikes and spares.
+
 
 ## Screencasts
 
@@ -26,6 +29,10 @@ rough drafts.
 | name | description |
 | --- | --- |
 | [01 - FRP Bowling - Introduction](https://www.youtube.com/watch?v=pym3exC74Zw) | Introduction to the application, overview of its modules, overview of TDD, and the testing framework.|
+| [02 - FRP Bowling - Scorer$](https://www.youtube.com/watch?v=gf5IvtlJdck) | TDD development of the scorer$, which transforms a stream of rolls into a stream of frame scores. |
+| [03 - FRP Bowling - Displayer$](https://www.youtube.com/watch?v=nMk0bqDetqw) | TDD development of the displayer$, which transforms a stream of rolls into a singleton stream of a string representing the display of the stream of rolls. |
+
+
 
 The key functional parts built with corresponding unit tests are:
 
