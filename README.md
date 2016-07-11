@@ -20,7 +20,8 @@ the TDD development of the application.  They take forever to load, and I will
 update the list as I get them out, the introduction and three principal modules
 are presently laid out.  None have been carefully edited -- this round is primarily
 or comments and discussion.  All mistakes are mine.  A written outline of the development
-will also be posted here as it is completed.
+will also be posted here as it is completed.  Please remember, these are all very
+rough drafts.
 
 | name | description |
 | --- | --- |
@@ -47,9 +48,21 @@ npm start
 ```
 Then open your browser to http://localhost:8080/
 
-## Running the Seed Application
+## Using the Seed Application to Perform the Kata Yourself
 
-If you care to follow the development in the Screencasts
+If you care to follow the development in the Screencasts, you might want to start
+with the current version of the browser-base testing framework at my Seed site,
+and follow along the kata development to perform it yourself.
+
+bash
+```bash
+git clone git@github.com:wizardwerdna/RxJS.git <yourdesiredfolder>
+cd <yourdesiredfolder>
+npm run setup
+npm start
+```
+
+
 
 ## Testsuite (Brower-console-based Test Functions).
 
