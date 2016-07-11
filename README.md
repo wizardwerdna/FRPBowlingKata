@@ -31,8 +31,7 @@ rough drafts.
 | [01 - FRP Bowling - Introduction](https://www.youtube.com/watch?v=pym3exC74Zw) | Introduction to the application, overview of its modules, overview of TDD, and the testing framework.|
 | [02 - FRP Bowling - Scorer$](https://www.youtube.com/watch?v=gf5IvtlJdck) | TDD development of the scorer$, which transforms a stream of rolls into a stream of frame scores. |
 | [03 - FRP Bowling - Displayer$](https://www.youtube.com/watch?v=nMk0bqDetqw) | TDD development of the displayer$, which transforms a stream of rolls into a singleton stream of a string representing the display of the stream of rolls. |
-
-
+| [04 - FRP Bowling - Enabler](https://www.youtube.com/watch?v=CsGYNkLjtbI) | TDD development of the enabler, which, given an array of scores from the scorer$ and  string from the displayer$, determines which roll buttons are to be disableto be disabled. |
 
 The key functional parts built with corresponding unit tests are:
 

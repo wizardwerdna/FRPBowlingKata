@@ -40,7 +40,7 @@ export function view(model$) {
         ),
       ]),
       hr(),
-      div('#footer',[
+      div('#footer', [
         a({props: {href: 'https://github.com/wizardwerdna/FRPBowlingKata'}}, [
           h5('Link to Github Repository')
         ])
