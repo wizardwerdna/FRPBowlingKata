@@ -40,7 +40,7 @@
     "validate-webpack:dev": "webpack-validator webpack.config.js --env.dev",
     "validate-webpack:prod": "webpack-validator webpack.config.js --env.prod",
     "clean-dist": "rimraf -rf dist/*",
-    "copy-files": "cpy src/index.html src/*.png dist",
+    "copy-files": "cpy src/index.html src/*.png src/*.css dist",
     "clean-and-copy": "npm run clean-dist && npm run copy-files",
     "prestart": "npm run clean-and-copy",
     "start": "webpack-dev-server --env.dev --content-base dist --inline --hot",
