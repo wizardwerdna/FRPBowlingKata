@@ -1,4 +1,3 @@
-
 # FRP Bowling Kata
 
 This repository contains a responsive functional application using Cycle.js and
@@ -45,7 +44,6 @@ The key functional parts built with corresponding unit tests are:
 
 To install and run the application, clone the repository, go to the directory and install dependencies and start the webpack-dev-server.
 
-bash
 ```bash
 git clone git@github.com:wizardwerdna/FRPBowlingKata.git
 cd FRPBowlingKata
@@ -60,7 +58,6 @@ If you care to follow the development in the Screencasts, you might want to star
 with the current version of the browser-base testing framework at my Seed site,
 and follow along the kata development to perform it yourself.
 
-bash
 ```bash
 git clone git@github.com:wizardwerdna/RxJS.git <yourdesiredfolder>
 cd <yourdesiredfolder>
