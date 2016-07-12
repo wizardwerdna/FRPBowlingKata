@@ -136,28 +136,42 @@ function testScore(rolls, expected) {
 }
 ```
 
-and we are <span style="color: red">red</span>!
+and we are <span style="color: red">red</span>!  So we can at last write some
+code.  The test requires the function to return an empty Observable, so the
+easiest way to accomplish this is simply to return that constant.  We call this
+use of a constant in testing a "slime."  The advantage is that it makes no
+commitment how that value is computed, its just the value itself.  Of course
+more tests will force us to take this specific constraint and generalize it.  As
+"Uncle Bob" Martin wrote
+
+```text
+As the tests get more specific, the code gets more generic.
+```
+
+So we write the most specific code we can imagine, and replace the return
+statement with:
 
 
 ```typescript
 return Observable.empty();
 ```
 
-and we are <span style="color: green">green</span>, then we <span style="color: orange">refactor</span>!
+and we are <span style="color: green">green</span>!
 
 ### Gutter Ball
 ```typescript
 test('gutter', testScore('-0|', '-0|'));
 ```
 
-and we are <span style="color: red">red</span>!
-
+and we are <span style="color: red">red</span>!  Examining these two test
+side-by-side, we notice that each test responds with its input alone.  Thus,
+this test can be satisfied simply by returning its input.
 
 ```typescrtipt
 return roll$
 ```
 
-and we are <span style="color: green">green</span>, then we <span style="color: orange">refactor</span>!
+and we are <span style="color: green">green</span>!
 
 
 ### Open Frame I
@@ -165,23 +179,47 @@ and we are <span style="color: green">green</span>, then we <span style="color: 
 test('open', testScore('-0-0|', '-0|'));
 ```
 
-and we are <span style="color: red">red</span>!
+and we are <span style="color: red">red</span>!  This test does not allow our
+last solution to work any longer, because it returns two, and not one 0.  But
+RxJS has an operation that will help us by simply selecting the first value
+of the input stream, or the empty stream in the case of an empty stream.
 
+Ok, bear with me.  I realize this is a stupid, dumb-as-dirt, way to solve
+the two gutter rolls from single gutter rolls.  But our tests say the result
+is the same for both of them.  So our new test fails by copying the [0,0].
+It turns out there is a five-character way to do this, so we do this, using
+the [`take Operator`](http://reactivex.io/rxjs/class/es6/Observable.js~Observable.html#instance-method-take)
+which simple takes the first element of the two cases, or empty, if there are no
+elements.
+<center><img src="http://reactivex.io/rxjs/img/take.png" width="600px"></center>
 
 ```typescrtipt
 return roll$.take(1)
 ```
 
-and we are <span style="color: green">green</span>, then we <span style="color: orange">refactor</span>!
+and we are <span style="color: green">green</span>!
 
 
 ### Open Frame II
+
+So, in response to our solution, the test writing person writes a test that
+trivially avoids our gambit, focusing on the last element, and not the first:
+
+
 ```typescript
 test('open', testScore('-0-1|', '-1|'));
 ```
 
-and we are <span style="color: red">red</span>!
+and we are <span style="color: red">red</span>.   That said, there is a 
+trivial solution that solves the problem.  Yes, I know we could write deeper
+code, but this is the simplest thing that works for our tests.  We simply replace
+the `take` operator with one that focuses on the last element:
 
+`Rxjs` has a
+[`takeLast Operator`](http://reactivex.io/rxjs/class/es6/Observable.js~Observable.html#instance-method-takeLast)
+<center><img src="http://reactivex.io/rxjs/img/takeLast.png" width="600px"></center>
+
+and we code:
 
 ```typescrtipt
 return roll$.takeLast(1)
@@ -191,32 +229,74 @@ and we are <span style="color: green">green</span>, then we <span style="color: 
 
 
 ### Open Frame III
+OK, finally, our test-writer self changes the test slightly in a way that makes
+trivial solutions far more difficult to write.
+ 
 ```typescript
 test('open', testScore('-1-1|', '-2|'));
 ```
 
-and we are <span style="color: red">red</span>!
+and we are <span style="color: red">red</span>!  Clearly, the solution is to
+simply add up the numbers.  RxJS has an operator for that: the
+[`reduce Operator`](http://reactivex.io/rxjs/class/es6/Observable.js~Observable.html#instance-method-reduce).
+<center><img src="http://reactivex.io/rxjs/img/reduce.png" width="600px"></center>
 
+This operator will be familiar with anyone who has used the corresponding `reduce`
+function with Javascript arrays.  We code:
+
+```typescript
+return roll$.reduce((acc, curr) => acc + curr);
+```
+
+and we are <span style="color: green">green</span>, then we <span style="color: orange">refactor</span>!
 
 ```typescript
 const sum = (acc, curr) => acc + curr;
 return roll$.reduce(sum);
 ```
 
-and we are <span style="color: green">green</span>, then we <span style="color: orange">refactor</span>!
-
-
 ### Two Open Frames I
+
+For our next test, we write code handling more than one frame:
+
 ```typescript
 test('two open', testScore('-0-0-1-1|', '-0-2|'));
 ```
 
-and we are <span style="color: red">red</span>!
+which fails because our existing code only returns a single number.  We are <span style="color: red">red</span>!
+
+
+This is a bit trickier than the earlier task, because we want to break up the
+open frames into separate groups before we reduce it with a sum.  Happily, Rx has operators
+for that, one of which is 
+
+[`windowCount(2) Operator`](
+http://reactivex.io/rxjs/class/es6/Observable.js~Observable.html#instance-method-windowCount).
+<center><img src="http://reactivex.io/rxjs/img/windowCount.png" width="600px"></center>
+
+
+This operator will take a stream, and break it up into substreams each of 
+which has two elements, so that we can operate on each substream separately.  
+If there are an even number of elements, an additional empty stream 
+appears at the end, and if there are an odd number of elements, 
+then the last element of the stream is added as a singleton stream with the last
+element.  What we have is a resulting stream of streams, each of which we can `reduce`.
+
+The problem is that we want to have a flattened stream of the resulting 
+reductions, and there is an operator for that too:
+[`mergeMap Operator`](http://reactivex.io/rxjs/class/es6/Observable.js~Observable.html#instance-method-mergeMap).
+Folks familiar with other functional languages may recognize this as a function
+called `flatMap`;
+<center><img src="http://reactivex.io/rxjs/img/mergeMap.png" width="600px"></center>
+
+What `mergemap` does to an Observable of Observables is to first apply the map
+function to each supplied inner Observable, and then merge the results together.
+For those in the know, this is equivalent to a `map`, followed by a `mergeAll`.
+We now write:
 
 
 ```typescript
-const frameScorer = frame =>
-  frame.reduce(sum); 
+const frameScorer = frame => frame.reduce(sum); 
 return roll$
   .windowCount(2)
   .mergeMap(frameScorer);
@@ -226,12 +306,24 @@ and we are <span style="color: green">green</span>, then we <span style="color: 
 
 
 ### Two Open Frames II
+
+But our code still isn't satisfactory, because it doesn't return a running sum
+of frame scores (because the previous example had a first frame score of zero).
+We work around this with the following test, to force a generalization.
+
 ```typescript
 test('two open', testScore('-1-1-2-2|', '-2-6|'));
 ```
 
 and we are <span style="color: red">red</span>!
 
+We now add a new operator that handles this.  `reduce` would not suffice,
+because it returns a single result, the sum of all the elements in the
+stream.  Rxjs has yet another useful result: [the `scan Operator`](
+http://reactivex.io/rxjs/class/es6/Observable.js~Observable.html#instance-method-scan).
+<center><img src="http://reactivex.io/rxjs/img/scan.png" width="600px"></center>
+
+Scan performs the acccumulation as does reduce, but emits the result of the process with an element for each time.  So we just add a scan to the end
 
 ```typescript
 return roll$
@@ -240,15 +332,21 @@ return roll$
   .scan(sum);
 ```
 
-and we are <span style="color: green">green</span>, then we <span style="color: orange">refactor</span>!
+and we are <span style="color: green">green</span>!  And so its time to move
+on to a different subject: the spare!
 
 
 ### Spare I
+
+In American ten pins, a spare scores a spare frame as 10 pins plus the pins
+for the next roll.  Thus:
+
 ```typescript
 test('spare', testScore('-5-5-5|', '-15-20|'));
 ```
 
-and we are <span style="color: red">red</span>!
+and we are <span style="color: red">red</span>!  Se we solve this by generalizing
+the frameScorer:
 
 
 ```typescript
@@ -260,16 +358,39 @@ const frameScorer = frame =>
   );
 ```
 
-and we are <span style="color: green">green</span>, then we <span style="color: orange">refactor</span>!
-
+and we are <span style="color: green">green</span>.  Now, yes, I know we used
+the 5 bonus as a slime, but this solution is helpful because it gives us the
+shape of our next generalization, which will be forced by our next test.
 
 ### Spare II
+
 ```typescript
 test('spare', testScore('-5-5-9|', '-19-28|'));
 ```
 
-and we are <span style="color: red">red</span>!
+and we are <span style="color: red">red</span>!  Here is our problem, the
+windowCount solution does not let us look at rolls beyond the two roll frame.
+So we need to gather and use that information somehow.  RxJS has a solution for
+that, the `bufferCount`.
 
+We have a few steps to solve this puzzle.  The first is to figure out
+how to "look ahead" to the next frame, and then to parse that frame
+for the result.  Again, we exploit a special Rxjs operator: 
+[`bufferCount Operator`](
+http://reactivex.io/rxjs/class/es6/Observable.js~Observable.html#instance-method-bufferCount).
+<center><img src="http://reactivex.io/rxjs/img/bufferCount.png" width="600px"></center>
+
+This reduces a stream of values into a stream of arrays, of the length passed in
+as the first parameter.  If a second parameter is given, then the next array starts
+that many items after the last one.  Thus for the example stream in our test: 
+`--5--5--9--|`, bufferCount(3,1)
+results in the stream: `--[5,5,9]--[5,9]--[9]--`.  Then, we break that stream
+up into the observable of observables, the first one having the first two
+elements `--[5,5,9]--[5,9]--`, and the second one having the remainder `--[9]--`
+
+Then, to score a substream (we call them frames), we pick off the first triplet 
+of that substream and check to see if its a spare.  If so, we add all three
+elements, otherwise we add the first two, as we would for any open frame.
 
 ```typescript
 ...
@@ -287,16 +408,76 @@ return roll$
   .scan(sum);
 ```
 
-and we are <span style="color: green">green</span>, then we <span style="color: orange">refactor</span>!
-
+and we are <span style="color: green">green</span>!  Time to solve the strike!
 
 ### Strike
+
+A strike is scored differently from the spare, in that the strike frame gets
+ten pins plus the next *two* rolls, instead of just one.  We write:
+
 ```typescript
 test('strike', testScore('-10-1-2|', '-13-16|'));
 ```
 
-and we are <span style="color: red">red</span>!
+and we are <span style="color: red">red</span>! This fails in two regards, getting
+both scores wrong.  The first frame is scored as an 11, and the second frame adds
+two, and not 3 pins.  We solve the first issue first, which requires only a
+minor adjustment to the framescorer to add up the three pins for strikes as
+well as spares,
 
+```typecript
+const frameScorer = frame =>
+  frame.
+    take(1).
+    map(rolls =>
+      rolls.pins[0] === 10 || rolls.pins[0] + rolls.pins[1] === 10 ?
+        rolls.pins.reduce(sumReducer) :
+        rolls.pins[0] + (rolls.pins[1] || 0)
+    );
+```
+
+which solves part of the problem, not outputting 13 for the first frame, 
+ but doesn't solve the miscounting of the second one.
+
+The problem is that while we are still breaking up every frame into two
+rolls using `windowCount(2)`, but strike frames take only one roll.  Thus,
+our program took the strike frame from the rolls 10 and 1, and then the
+second frame with the roll 2.  This requires a structural change, braking
+frames into 1 or two rolls, depending on whether they are strikes or
+non-strikes.  The `windowCount` operator doesn't cut it here.
+
+But Rx has another operator that will suit us fine, after a bit of
+preprocessing.  Consider the 
+
+[`groupBy`](http://reactivex.io/rxjs/class/es6/Observable.js~Observable.html#instance-method-groupBy) operator.
+<center><img src="http://reactivex.io/rxjs/img/groupBy.png" width="600px"></center>
+
+`groupBy`, like `windowCount` breaks the stream up to a stream of substreams,
+but runs a "key" function to determine how to break up the frames.  If we somehow
+preprocess the stream of triplets into a stream of objects of the form:
+
+{frame: <framenumber> pins: <triplet>}
+
+we can use `groupBy(x => x.frame)` will break the stream into substreams by frame. 
+
+We begin by restructuring the sequence
+
+```typescript
+.bufferCount(3,1)
+.windowCount(2)
+```
+
+as
+
+```typescript
+.bufferCount(3,1)
+.scan(frameReducer, {frame: 0, isLastRoll: true}
+.groupBy(roll => roll.frame, roll => roll.pins)
+```
+
+and then write a frameReducer to break up frames the same manner as windowCount.
+The second parameter removes the scaffolding to return to the original roll
+triplets.
 
 ```typescript
 ...
@@ -325,11 +506,21 @@ and we are <span style="color: green">green</span>, then we <span style="color: 
 
 
 ### Partial Spare
+
+We are not scoring every type of frame correctly.  In particular, when a frame
+has a mark like a strike or a spare, by convention, we do not score the frame
+until the bowler has rolled all of the bonus pins.  We write a test to prove
+this:
+
 ```typescript
 test('partial spare', testScore('-5-5|', '-|'));
 ```
 
-and we are <span style="color: red">red</span>!
+and we are <span style="color: red">red</span>!  This happens because bufferCount
+does not always produce arrays having three elements, and this makes reduces
+err quietly.  To fix this, we map all the responses from bufferCount to have
+three elements, expanding short arrays with `NaN` elements, so that the sum
+reduce results in NaN for the frame score.  Then we filter out the NaNs.
 
 
 ```typescript
@@ -346,6 +537,11 @@ return roll$
 and we are <span style="color: green">green</span>, then we <span style="color: orange">refactor</span>!
 
 ### Spare Game
+
+There is one last problem to solve before we can move on to the displayer: the
+spare game scores the last dangling 5 as a partial open and eleventh frame,
+as shown by this test:
+
 ```typescript
 test('spare game', testScore(
   '-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5|',
@@ -353,7 +549,8 @@ test('spare game', testScore(
 ));
 ```
 
-and we are <span style="color: red">red</span>!
+and we are <span style="color: red">red</span>!  We solve this simply
+by limiting the number of frames we return, using the `take` operator.
 
 ```typescript
 return roll$
@@ -361,7 +558,9 @@ return roll$
   .take(10);
 ```
 
-and we are <span style="color: green">green</span>, then we <span style="color: orange">refactor</span>!
+and we are <span style="color: green">green</span>, then we <span style="color: orange">refactor</span>!  This yields a rather pretty piece of code that looks like
+it was designed by first and coded top-down.  Agreed it is pretty.  What do you
+think? 
 
 ```typescript
 roll$
