@@ -1,5 +1,5 @@
-import {displayer$} from '../displayer';
-import {scorer$} from '../scorer';
+import {displayer$} from './displayer';
+import {scorer$} from './scorer';
 import {Observable} from 'rxjs';
 
 export function model(action$, props$) {

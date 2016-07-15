@@ -1,4 +1,4 @@
-import {test, expect, mbl2str$} from '../testsuite';
+import {test, expect, mbl2str$} from '../../testsuite';
 import {scorer$} from './scorer';
 export function scorerTests() {
   test('empty', testScore('-|', '-|'));

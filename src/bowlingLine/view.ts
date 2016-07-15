@@ -1,5 +1,5 @@
 import {a, hr, button, img, span, h1, h3, div} from '@cycle/dom';
-import {enabler} from '../enabler';
+import {enabler} from './enabler';
 require('../styles.css');
 require('../Rx_Logo_S.png');
 require('../favicon.ico');

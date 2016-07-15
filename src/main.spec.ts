@@ -1,7 +1,7 @@
 import {test} from '../testsuite';
-import {scorerTests} from './scorer.spec';
-import {displayerTests} from './displayer.spec';
-import {enablerTests} from './enabler.spec';
+import {scorerTests} from './bowlingLine/scorer.spec';
+import {displayerTests} from './bowlingLine/displayer.spec';
+import {enablerTests} from './bowlingLine/enabler.spec';
 
 export function mainTests() {
   test('>>> FRP Bowling Kata Scorer', scorerTests, false);

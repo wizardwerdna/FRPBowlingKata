@@ -1,6 +1,6 @@
-import {intent} from './intent';
 import {model} from './model';
 import {view} from './view';
+import {intent} from './intent';
 import {BowlingLine} from './bowlingLine';
 import isolate from '@cycle/isolate';
 import {Observable as O} from 'rxjs';

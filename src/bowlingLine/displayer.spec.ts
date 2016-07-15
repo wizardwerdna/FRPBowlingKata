@@ -1,4 +1,4 @@
-import {test, expect, mbl2str$} from '../testsuite';
+import {test, expect, mbl2str$} from '../../testsuite';
 import {displayer$} from './displayer';
 
 export function displayerTests() {

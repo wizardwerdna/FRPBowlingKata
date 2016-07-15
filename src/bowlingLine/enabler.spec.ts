@@ -1,4 +1,4 @@
-import {test, expect} from '../testsuite';
+import {test, expect} from '../../testsuite';
 import {enabler} from './enabler';
 
 export function enablerTests() {
