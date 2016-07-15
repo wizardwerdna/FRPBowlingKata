@@ -56,26 +56,26 @@ button {
   margin: 1pt;
 }
 
-button#newgame {
+button.newgame {
   background-color: red;
   width: 100px;
   padding: 3px;
 }
-button#newgame:disabled {background-color: lightgray}
+button.newgame:disabled {background-color: lightgray}
 
-button#undo {
+button.undo {
   background-color: orange;
   width: 100px;
   padding: 3px;
 }
-button#undo:disabled {background-color: lightgray}
+button.undo:disabled {background-color: lightgray}
 
-button#redo {
+button.redo {
   background-color: green;
   width: 100px;
   padding: 3px;
 }
-button#redo:disabled {background-color: lightgray}
+button.redo:disabled {background-color: lightgray}
 
 button:disabled {
   background-color: lightgray;

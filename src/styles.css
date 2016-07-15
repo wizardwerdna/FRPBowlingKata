@@ -47,35 +47,56 @@ img {
   width:  40px;
 }
 
+.name {
+  font-weight: bolder;
+}
+
 button {
   background-color: green;
   color: white;
-  height: 30px;
+  height: 20px;
   width: 30px;
   border: none;
+  padding: 3px;
   margin: 1pt;
 }
 
-button#newgame {
+span.actions {
+  cloat: left;
+  margin-left: 2pc;
+}
+
+div.rollButtons {
+  float: left;
+  width: 130px;
+}
+
+button.rollButton {
+  width: 20px;
+}
+
+button.newgame {
   background-color: red;
-  width: 100px;
-  padding: 3px;
+  width: 40px;
 }
-button#newgame:disabled {background-color: lightgray}
+button.newgame:disabled {background-color: lightgray}
 
-button#undo {
+button.undo {
   background-color: orange;
-  width: 100px;
-  padding: 3px;
+  width: 40px;
 }
-button#undo:disabled {background-color: lightgray}
+button.undo:disabled {background-color: lightgray}
 
-button#redo {
+button.redo {
   background-color: green;
-  width: 100px;
-  padding: 3px;
+  width: 40px;
 }
-button#redo:disabled {background-color: lightgray}
+button.redo:disabled {background-color: lightgray}
+
+button.delete {
+  background-color: red;
+  width: 40px;
+}
 
 button:disabled {
   background-color: lightgray;
@@ -84,6 +105,7 @@ button:disabled {
 .frames{
   clear: both;
   margin-top: 5px;
+  margin-bottom: 5px;
 }
 
 .clearfix:after {
@@ -130,4 +152,14 @@ button:disabled {
 .scoreDisplay {
   padding-right: 5px;
   margin-top: 25px;
+}
+
+.playerInput {
+  float: left;
+}
+
+.playerLabel {
+  padding-right: 5px;
+  float: left;
+  font-size: small;
 }
