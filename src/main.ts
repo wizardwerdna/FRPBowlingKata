@@ -5,17 +5,21 @@ import {BowlingLine} from './bowlingLine';
 import isolate from '@cycle/isolate';
 import {Observable as O} from 'rxjs';
 
-export function main(sources) {
+export function main({DOM}) {
 
-  const action$ = intent(sources.DOM);
-  const model$ = model(action$, makeBowlingLineWrapper(sources.DOM));
-  const vtree$ = view(model$);
-  return {DOM: vtree$};
+  return {DOM:
+    view(
+      model(
+        intent(DOM),
+        makeBowlingLineWrapper(DOM)
+      )
+    )
+  };
 
-  function makeBowlingLineWrapper(DOMSource) {
+  function makeBowlingLineWrapper(DOM) {
     return function makeBowlingLine(name, id) {
       const bowlingLine = isolate(BowlingLine)({
-        DOM: DOMSource, props$: O.of({name, id})
+        DOM: DOM, props$: O.of({name, id})
       });
       console.log('makeBowlingLine', name, bowlingLine);
       return bowlingLine;

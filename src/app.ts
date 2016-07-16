@@ -6,4 +6,5 @@ import {main} from './main';
 import {mainTests} from './main.spec';
 
 test('>>> FRP Bowling Kata Tests', mainTests, false);
+
 run(main, {DOM: makeDOMDriver('#app', {transposition: true})});

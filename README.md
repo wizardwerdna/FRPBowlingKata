@@ -131,6 +131,7 @@ the elements presented.  Thus `mbl2str$('--a-b--c--|')` is the same stream as `m
     1. Connect DOM.sources to actions$
     1. Connect actions$ to model$ 
     1. Connect the "dumb" DOM Return with the model 
+    1. Implement Undo/Redo functionality
 1.  Making and using a BowlingLine Component
 1.  Building a UI to create a multi-line application.
 1.  Building the Delete line functionality.

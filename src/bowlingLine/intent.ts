@@ -1,32 +1,32 @@
 import {Observable} from 'rxjs';
 
-export function intent(sources) {
+export function intent(DOM) {
 
-  const DOMSources = sources.DOM;
-  const newGameButton$ = DOMSources.select('.newgame').events('click');
-  const undoButton$ = DOMSources.select('.undo').events('click');
-  const redoButton$ = DOMSources.select('.redo').events('click');
-  const deleteButtons$ = DOMSources.select('.delete').events('click');
-  const rollButton$ = DOMSources.select('.rollButton').events('click');
+  const buttonClick$ = DOM.select('button').events('click');
 
   return Observable.merge(
-    newGameButton$
-      .startWith(null)
+
+    buttonClick$
+      .filter(evt => evt.target.className === 'newgame')
       .map(evt => (
         { type: 'NEWGAME' }
       )),
 
-    undoButton$.map(evt => ({ type: 'UNDO' })),
-    redoButton$.map(evt => ( { type: 'REDO' })),
+    buttonClick$
+    .filter(evt => evt.target.className === 'undo')
+    .map(evt => ({ type: 'UNDO' })),
 
-    deleteButtons$.withLatestFrom(sources.props$, (_, props) => props)
-      .map(props => ({type: 'DELETE', payload: props})),
+    buttonClick$
+      .filter(evt => evt.target.className === 'redo')
+      .map(evt => ( { type: 'REDO' })),
 
-    rollButton$
+    buttonClick$
+      .filter(evt => evt.target.className === 'rollButton')
       .map(evt => parseInt(evt.target.innerHTML))
       .map(payload => (
         { type: 'ROLL', payload }
       ))
-  );
+
+  ).startWith({type: 'NEWGAME'});
 
 }
