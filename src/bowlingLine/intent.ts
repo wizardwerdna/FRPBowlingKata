@@ -1,6 +1,6 @@
 import {Observable} from 'rxjs';
 
-export function intent(DOM) {
+export function intent(DOM, props$) {
 
   const buttonClick$ = DOM.select('button').events('click');
 
@@ -19,6 +19,11 @@ export function intent(DOM) {
     buttonClick$
       .filter(evt => evt.target.className === 'redo')
       .map(evt => ( { type: 'REDO' })),
+
+    buttonClick$
+      .filter(evt => evt.target.className === 'delete')
+      .switchMapTo(props$)
+      .map(props => ({ type: 'DELETE', payload: props.id }) ),
 
     buttonClick$
       .filter(evt => evt.target.className === 'rollButton')

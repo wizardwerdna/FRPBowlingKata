@@ -1,6 +1,6 @@
 import {Observable} from 'rxjs';
 
-export function intent(DOMSources) {
+export function intent(DOMSources, deleter$) {
 
   const CR = 13;
 
@@ -11,7 +11,13 @@ export function intent(DOMSources) {
     playerInput$
       .map(evt => ({keyCode: evt.keyCode, value: evt.target.value}))
       .filter(each => each.keyCode === CR && each.value.trim())
-      .map(each => ({type: 'ADDPLAYER', payload: each.value.trim()}))
+      .map(each => ({type: 'ADDPLAYER', payload: each.value.trim()})),
 
-  ).startWith({type: 'INITIALIZE'});
+    deleter$
+      .map(lineDeleter => ({
+        type: 'DELETEPLAYER',
+        payload: lineDeleter.payload
+      }))
+
+  ).share();
 }

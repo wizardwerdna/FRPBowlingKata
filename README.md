@@ -129,13 +129,23 @@ the elements presented.  Thus `mbl2str$('--a-b--c--|')` is the same stream as `m
 1.  Building the `main` function using the reducer pattern.
     1. Building the "dumb" DOM Return
     1. Connect DOM.sources to actions$
-    1. Connect actions$ to model$ 
-    1. Connect the "dumb" DOM Return with the model 
-    1. Implement Undo/Redo functionality
+    1. Connect actions$ to build a state model$ 
+    1. Connect the "dumb" DOM Return with the model data
+1.  Implement Undo/Redo functionality
 1.  Making and using a BowlingLine Component
 1.  Building a UI to create a multi-line application.
 1.  Building the Delete line functionality.
-  
+    1. In component
+        1. add key to vtree from props.id
+        1. add delete buttons to each component
+        1. add DELETE actions
+        1. return a Delete stream
+    1. In top level
+        1. in model, pull a merged stream of individual Delete streams
+        1. in index, create a proxy to receive individual pulls
+        1. after model, push the erged stream  to proxy
+        1. in intent, respond to received Delete ctions with DELETEPLAYER
+        1. add DELETEPLAYER actions and reducer to model, deleting lines
 
 ## Development of the `scorer$`
 

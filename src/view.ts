@@ -34,11 +34,6 @@ function vInput() {
     label('.playerLabel', 'New Player:'),
     input('.playerInput', {
       props: {autofocus: true},
-      hook: {
-        update: (oldVNode, {elm}) => {
-          elm.value = '';
-        }
-      }
     })
   ]);
 }

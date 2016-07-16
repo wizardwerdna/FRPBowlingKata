@@ -6,7 +6,7 @@ require('../favicon.ico');
 
 export function view(model$) {
   return model$.map(([display, scores, props, pastLength, futureLength]) =>
-    div([
+    div({key: props.id}, [
       vPlayerName(props),
       vFrames(display, scores),
       vRollButtons(display, scores),
@@ -17,12 +17,7 @@ export function view(model$) {
 };
 
 function vPlayerName(props) {
-  return div(
-    '.name',
-    props.name.toString() +
-      '(' + props.id.toString()
-      + ')'
-  );
+  return div( '.name', props.name.toString() );
 }
 
 function vFrames(display, scores) {
@@ -57,6 +52,6 @@ function vActions(display, pastLength, futureLength) {
       {props: {disabled: pastLength <= 1}}, 'Undo'),
     button('.redo',
       {props: {disabled: futureLength === 0}}, 'Redo'),
-    // button('.delete', 'X'),
+    button('.delete', 'X')
   ]);
 }

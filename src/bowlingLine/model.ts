@@ -29,7 +29,7 @@ export function model(action$, props$) {
     action$
       .filter((action: any) => action.type === 'UNDO')
       .map(action =>
-        function newGameReducer(state) {
+        function undoReducer(state) {
           if (state.past.length === 0) {
             return state;
           } else {
@@ -45,7 +45,7 @@ export function model(action$, props$) {
     action$
       .filter((action: any) => action.type === 'REDO')
       .map(action =>
-        function newGameReducer(state) {
+        function redoReducer(state) {
           if (state.future.length === 0) {
             return state;
           } else {
@@ -55,15 +55,6 @@ export function model(action$, props$) {
               future: state.future.slice(0, state.future.length - 1)
             };
           }
-        }
-      ),
-
-    action$
-      .filter((action: any) => action.type === 'DELETE')
-      .map(action =>
-        function deleteReducer(state) {
-          console.log('doing a deleteReducer Now', action.payload);
-          return state;
         }
       ),
 
