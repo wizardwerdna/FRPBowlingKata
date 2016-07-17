@@ -1,9 +1,17 @@
 # FRP Bowling Kata
 
-This repository contains a responsive functional application using Cycle.js and
-Typescript to implement an interactive bowling scoring program.  The Kata will be
-built with a homegrown two-function testing suite that displays its results
+In this kata, we will build out and implement a program for
+an interactive bowling scoring program using Functional Responsive Programming,
+with RxJS and CycleJS technologies.  Using
+Test-First disciplines, we will build these applications from scratch,
+starting with an empty file. The Kata will be
+built with a testing suite that displays its results
 in the browser console.
+
+I hope these katas may inspire you to
+adopt these terrific agile practices to change the world with your own
+examples and craftsmanship.
+
 
 <center><img src="https://raw.githubusercontent.com/wizardwerdna/FRPBowlingKata/master/Display.png" width="600px"></center>
 
@@ -40,6 +48,26 @@ The key functional parts built with corresponding unit tests are:
 | displayer$ | transforms a stream of rolls into a string (as a singleton stream), in which gutter balls are shown as "-", spares are shown as "/" and strikes are shown as " X" (or just "X" for the tenth frame). |
 | enabled | a function that returns a value representing the maximum button to be enabled |
 
+## What is a Code Kata?
+
+A Kata is a stylized solution to a small-ish and well-defined problem, meant
+to illustrate key development techniques. I will perform each kata for you 
+in a screencast and in written materials summarizing the development.
+Then it is your turn.  Based on what you read and saw, perform the kata yourself 
+until you have assimilated the techniques for its solution.
+
+Correct performance has nothing to do with mimicking what I show you,
+but by finding your own chops and improving on the craft.
+We repeat katas to better comprehend the practices and to build mental
+"muscle memory" so that skills flow quickly from your mind, as though you
+were touch typing the ideas themselves. They should take your breath
+away, as can a Mozart aria.
+
+My name is Andrew Greenberg, and I would be grateful for your comments
+and suggestions as you work through these forms. You can find me by
+e-mail at wizardwerdna@gmail.com, or at @wizardwerdna on twitter. Now,
+let's get this kata started.
+
 ## Running the application
 
 To install and run the application, clone the repository, go to the directory and install dependencies and start the webpack-dev-server.
@@ -64,8 +92,6 @@ cd <yourdesiredfolder>
 npm run setup
 npm start
 ```
-
-
 
 ## Testsuite (Brower-console-based Test Functions).
 
