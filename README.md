@@ -610,14 +610,22 @@ function scoreFrames(frame$) {
 function cleanPartials(score$) {
   return score$  
     .filter(score => !isNaN(score))
-    .take(1)
+    .take(10)
 }
 
 ```
 
 ## Development of the `displayer$`
 
-TO BE DONE
+The `displayer$` takes the same stream of rolls as the `scorer$` and returns
+a singleton stream containing a string that would be displayed in the rolls
+display line of the game display.  Gutter balls are displayed as '-', not a
+0.  Strikes are display as a space followed by an X, except for the tenth
+frame, and all other rolls are displayed either as the number of pins if an
+open frame or first roll, and as a '/' if its a successful spare attempt.
+
+We begin, as before, with a test for the empty game, which yields an empty
+string.
 
 ### The Empty Game
 ```javascript
@@ -629,167 +637,246 @@ TO BE DONE
     };
   }
 ```
-and we are <span style="color: red">red</span>!
+and we are <span style="color: red">nred</span>!
 ```typescript
-SOLUTION GOES HERE
+function displayer$(roll$) {
+  return Observer.of('');
+}
 ```
-and we are <span style="color: green">green</span>, then we <span style="color: orange">refactor</span>!
+and we are <span style="color: green">green</span>!
 
 ### One Gutter Ball
 ```javascript
-  test('gutter', testDisplay('-0|', '-'));
+test('gutter', testDisplay('-0|', '-'));
 ```
-and we are <span style="color: red">red</span>!
+and we are <span style="color: red">red</span>! We need to return different results
+depending upon whether or not roll$ is empty.  It turns out there is an operator
+that can handle this case.  `Rxjs` has a
+[`defaultIfEmpty Operator`](http://reactivex.io/rxjs/class/es6/Observable.js~Observable.html#instance-method-defaultIfEmpty)
+<center><img src="http://reactivex.io/rxjs/img/defaultIfEmpty.png" width="600px"></center>
+ 
 ```typescript
-SOLUTION GOES HERE
+return roll$
+  .mapTo('-')
+  .defaultIfEmpty('')
 ```
-and we are <span style="color: green">green</span>, then we <span style="color: orange">refactor</span>!
+and we are <span style="color: green">green</span>!
 
 ### One Strike
 ```javascript
-  test('strike', testDisplay('-10|', ' X'));
+test('strike', testDisplay('-10|', ' X'));
 ```
 and we are <span style="color: red">red</span>!
 ```typescript
-SOLUTION GOES HERE
+roll$
+  .map(pins =>
+    pins === 10 ?
+      ' X' :
+    '-'
+  )
+  .defaultIfEmpty('');
 ```
-and we are <span style="color: green">green</span>, then we <span style="color: orange">refactor</span>!
+and we are <span style="color: green">green</span>!
 
 ### One Non-gutter, Non-strike Roll I
 ```javascript
-  test('other', testDisplay('-1|', '1'));
+test('other', testDisplay('-1|', '1'));
 ```
-and we are <span style="color: red">red</span>!
+and we are <span style="color: red">red</span>!  So we resolve this by adding
+another case, and then defaulting non-empty streams to '1', which is a slime.
 ```typescript
-SOLUTION GOES HERE
+roll$
+  .map(pins =>
+    pins === 10 ?
+      ' X' :
+    pins === 0 ?
+      '-' :
+    '1'
+  )
+  .defaultIfEmpty('');
 ```
-and we are <span style="color: green">green</span>, then we <span style="color: orange">refactor</span>!
+and we are <span style="color: green">green</span>!  We add another test forcing
+us to generalize the slime.
 
 ### One Non-gutter, Non-strike Roll II
 ```javascript
   test('other', testDisplay('-9|', '9'));
 ```
-and we are <span style="color: red">red</span>!
+and we are <span style="color: red">red</span>!  Of course, we could add a `pins === 1 ?`
+case, and on and on for the rest of the pincounts, but there is a much shorter
+generalization that works, and that is precisely when we do generalize -- when it is
+more painful to do things case-by-case.  As tests get more specific, the code gets
+more generic.
 ```typescript
-SOLUTION GOES HERE
+roll$
+  .map(pins =>
+    pins === 10 ?
+      ' X' :
+    pins === 0 ?
+      '-' :
+    pins.toString(); 
+  )
+  .defaultIfEmpty('');
 ```
 and we are <span style="color: green">green</span>, then we <span style="color: orange">refactor</span>!
+
+```typescript
+
+const displayOneRoll = (pins) =>
+  pins === 10 ?
+    ' X' :
+  pins === 0 ?
+    '-' :
+  pins.toString(); 
+
+roll$
+  .map(displayOneRoll)
+  .defaultIfEmpty('');
+```
 
 ### Two Rolls
 ```javascript
-  test('two rolls', testDisplay('-0-9|', '-9'));
+test('two rolls', testDisplay('-0-9|', '-9'));
 ```
-and we are <span style="color: red">red</span>!
+and we are <span style="color: red">red</span>!  So we must generalize in the
+single roll case, and reduce screams out as the alternative.
 ```typescript
-SOLUTION GOES HERE
+const displayOneRoll = (pins) =>
+  pins === 10 ?
+    ' X' :
+  pins === 0 ?
+    '-' :
+  pins.toString(); 
+
+roll$
+  .reduce((display, roll) => display + displayOneRoll(roll), '')
+  .defaultIfEmpty('');
 ```
-and we are <span style="color: green">green</span>, then we <span style="color: orange">refactor</span>!
+and we are <span style="color: green">green</span>, then we <span style="color: orange">refactor</span>! Because
+the reduce handles the empty case effetively, we cand delete the call to `defaultIfEmpty`.
+
+```typescript
+const isStrike = pins => pins === 10;
+const isGutter = pins => pins === 0;
+const displayOneRoll = (pins) =>
+  isStrike(pins) ?
+    ' X' :
+  isGutter(pins) ?
+    '-' :
+  pins.toString(); 
+
+const addPinToDisplay = (display, pins) => display + displayOneRoll(pins);
+
+roll$.display(addPinToDisplay, '');
+```
 
 ### One Spare
 ```javascript
-  test('spare', testDisplay('-5-5|', '5/'));
+test('spare', testDisplay('-0-10|', '-/'));
+test('spare', testDisplay('-5-5|', '5/'));
 ```
-and we are <span style="color: red">red</span>!
+and we are <span style="color: red">red</span>!  To determine whether a roll yield
+a strike or a spare attempt, we will need the information from display in the 
+displayOneRoll code.  Basically, its a spare if its a spare attempt and the
+roll plus the pins from the last roll add to 10.  We begin with the obvious
+efforts, noting that the case `-0-10|` should result in `-/`:
 ```typescript
-SOLUTION GOES HERE
+...
+const displayOneRoll = (display, pins) =>
+
+  display.length > 0 && 
+    pins + (parseInt(display[display.length - 1]) || 0)  === 10  ?
+    '/' :
+  isStrike(pins) ?
+    ' X' :
+  isGutter(pins) ?
+    '-' :
+  pins.toString(); 
+
+const addPinToDisplay = (display, pins) => display + displayOneRoll(display, pins);
+...
 ```
 and we are <span style="color: green">green</span>, then we <span style="color: orange">refactor</span>!
 
-### Tenth Frame: Non-Strike
+```typescript
+...
+const lastRoll = display => parseInt(display[display.length - 1]) || 0;
+const isSpareAttempt = (display, pins) => display.length > 0 
+const isSpare = (display, pins) =>
+  isSpareAttempt(display, pins) && pins + lastRoll(display, pins) === 10;
+
+const displayOneRoll = (display, pins) =>
+  isSpare(display, pins) ?
+    '/' :
+  isStrike(pins) ?
+    ' X' :
+  isGutter(pins) ?
+    '-' :
+  pins.toString(); 
+
+const addPinToDisplay = (display, pins) => display + displayOneRoll(display, pins);
+...
+```
+
+Now this is the structure we will end up with.  Really, the rest of our tests
+provide details for isSpareAttempt and how to handle isStrike in the tenth frame.
+I will leave the roll-by-roll development as an exercise, I will provide the tests
+and we end up with the following refactored version.  Note in particular the
+development of `isSpareAttempt` and the introduction of `spaceUnlessTenth`.
+
+### Two Frame Spare and Tenth Frame Tests
 ```javascript
+  test('two spares', testDisplay('-5-10-0-5|', '5/-/'))
   test('tenth frame', function() {
     const preRolls = '-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0';
     const preDisplay = '------------------';
     test('spare', testDisplay(preRolls + '-0-10|', preDisplay + '-/'));
-```
-and we are <span style="color: red">red</span>!
-```typescript
-SOLUTION GOES HERE
-```
-and we are <span style="color: green">green</span>, then we <span style="color: orange">refactor</span>!
-
-### Tenth Frame: Spare/Non
-```javascript
     test('spare/non', testDisplay(preRolls + '-0-10-0|', preDisplay + '-/-'));
-```
-and we are <span style="color: red">red</span>!
-```typescript
-SOLUTION GOES HERE
-```
-and we are <span style="color: green">green</span>, then we <span style="color: orange">refactor</span>!
-
-
-### Tenth Frame: Spare/Strike
-```javascript
     test('spare/strike', testDisplay(preRolls + '-0-10-10|', preDisplay + '-/X'));
-```
-and we are <span style="color: red">red</span>!
-```typescript
-SOLUTION GOES HERE
-```
-and we are <span style="color: green">green</span>, then we <span style="color: orange">refactor</span>!
-
-### Tenth Frame: Strike
-```javascript
     test('strike', testDisplay(preRolls + '-10|', preDisplay + 'X'));
-```
-and we are <span style="color: red">red</span>!
-```typescript
-SOLUTION GOES HERE
-```
-and we are <span style="color: green">green</span>, then we <span style="color: orange">refactor</span>!
-
-### Tenth Frame: Strike/Non
-```javascript
     test('strike/non', testDisplay(preRolls + '-10-0|', preDisplay + 'X-'));
-```
-and we are <span style="color: red">red</span>!
-```typescript
-SOLUTION GOES HERE
-```
-and we are <span style="color: green">green</span>, then we <span style="color: orange">refactor</span>!
-
-### Tenth Frame: Open
-```javascript
     test('strike/open', testDisplay(preRolls + '-10-0-0|', preDisplay + 'X--'));
-```
-and we are <span style="color: red">red</span>!
-```typescript
-SOLUTION GOES HERE
-```
-and we are <span style="color: green">green</span>, then we <span style="color: orange">refactor</span>!
-
-### Tenth Frame: Strike/Spare
-```javascript
     test('strike/spare', testDisplay(preRolls + '-10-0-10|', preDisplay + 'X-/'));
-```
-and we are <span style="color: red">red</span>!
-```typescript
-SOLUTION GOES HERE
-```
-and we are <span style="color: green">green</span>, then we <span style="color: orange">refactor</span>!
-
-### Tenth Frame: Double
-```javascript
     test('double', testDisplay(preRolls + '-10-10|', preDisplay + 'XX'));
-```
-and we are <span style="color: red">red</span>!
-```typescript
-SOLUTION GOES HERE
-```
-and we are <span style="color: green">green</span>, then we <span style="color: orange">refactor</span>!
-
-### Tenth Frame: Turkey
-```javascript
     test('turkey', testDisplay(preRolls + '-10-10-10|', preDisplay + 'XXX'));
   });
 ```
 and we are <span style="color: red">red</span>!
 
 ```typescript
-SOLUTION GOES HERE
+function displayer$(pins$) {
+
+  const lastRoll = (display, pins) => parseInt(display[display.length - 1]) || 0;
+  const isDoubleAttempt = (display, pins) =>
+    display.length === 19 && display[18] === 'X';
+  const isStrikeSpareAttempt = (display, pins) =>
+    display.length === 20 && display[18] === 'X' && display[19] !== 'X';
+  const isOddRoll = (display, pins) => display.length % 2 === 1;
+  const isSpareAttempt = (display, pins) =>
+    (isOddRoll(display, pins) && !isDoubleAttempt(display, pins)) ||
+      isStrikeSpareAttempt(display, pins);
+  const isSpare = (display, pins) =>
+    isSpareAttempt(display, pins) && pins + lastRoll(display, pins) === 10;
+  const isGutter = (display, pins) => pins === 0;
+  const isStrike = (display, pins) => pins === 10;
+  const spaceUnlessTenth = (display) => display.length >= 18 ? '' : ' ';
+
+  const displayOneRoll = (display, pins) =>
+    isSpare(display, pins) ?
+      '/' :
+    isGutter(display, pins) ?
+      '-' :
+    isStrike(display, pins) ?
+      spaceUnlessTenth(display) + 'X' :
+    pins.toString();
+
+  const addPinsToDisplay = (display, pins) =>
+    display + displayOneRoll(display, pins);
+
+  return pins$.reduce(addPinsToDisplay);
+}
 ```
-and we are <span style="color: green">green</span>, then we <span style="color: orange">refactor</span>!
+and we are <span style="color: green">green</span>!
 
 ## Development of the `enabler`
 
