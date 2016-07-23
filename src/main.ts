@@ -23,4 +23,3 @@ export function main({DOM}) {
     };
   }
 }
-

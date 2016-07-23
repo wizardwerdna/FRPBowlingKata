@@ -39,6 +39,7 @@ rough drafts.
 | [02 - FRP Bowling - Scorer$](https://www.youtube.com/watch?v=gf5IvtlJdck) | TDD development of the scorer$, which transforms a stream of rolls into a stream of frame scores. |
 | [03 - FRP Bowling - Displayer$](https://www.youtube.com/watch?v=nMk0bqDetqw) | TDD development of the displayer$, which transforms a stream of rolls into a singleton stream of a string representing the display of the stream of rolls. |
 | [04 - FRP Bowling - Enabler](https://www.youtube.com/watch?v=CsGYNkLjtbI) | TDD development of the enabler, which, given an array of scores from the scorer$ and  string from the displayer$, determines which roll buttons are to be disableto be disabled. |
+| [05 - CycleJS Static DOM Display](https://www.youtube.com/watch?v=zc6TyL5TK2g) | TDD development of the view for a bowling line  component of a CycleJS Application |
 
 The key functional parts built with corresponding unit tests are:
 
@@ -51,9 +52,9 @@ The key functional parts built with corresponding unit tests are:
 ## What is a Code Kata?
 
 A Kata is a stylized solution to a small-ish and well-defined problem, meant
-to illustrate key development techniques. I will perform each kata for you 
+to illustrate key development techniques. I will perform each kata for you
 in a screencast and in written materials summarizing the development.
-Then it is your turn.  Based on what you read and saw, perform the kata yourself 
+Then it is your turn.  Based on what you read and saw, perform the kata yourself
 until you have assimilated the techniques for its solution.
 
 Correct performance has nothing to do with mimicking what I show you,
@@ -155,7 +156,7 @@ the elements presented.  Thus `mbl2str$('--a-b--c--|')` is the same stream as `m
 1.  Building the `main` function using the reducer pattern.
     1. Building the "dumb" DOM Return
     1. Connect DOM.sources to actions$
-    1. Connect actions$ to build a state model$ 
+    1. Connect actions$ to build a state model$
     1. Connect the "dumb" DOM Return with the model data
 1.  Implement Undo/Redo functionality
 1.  Making and using a BowlingLine Component
@@ -261,7 +262,7 @@ trivially avoids our gambit, focusing on the last element, and not the first:
 test('open', testScore('-0-1|', '-1|'));
 ```
 
-and we are <span style="color: red">red</span>.   That said, there is a 
+and we are <span style="color: red">red</span>.   That said, there is a
 trivial solution that solves the problem.  Yes, I know we could write deeper
 code, but this is the simplest thing that works for our tests.  We simply replace
 the `take` operator with one that focuses on the last element:
@@ -282,7 +283,7 @@ and we are <span style="color: green">green</span>, then we <span style="color: 
 ### Open Frame III
 OK, finally, our test-writer self changes the test slightly in a way that makes
 trivial solutions far more difficult to write.
- 
+
 ```typescript
 test('open', testScore('-1-1|', '-2|'));
 ```
@@ -319,21 +320,21 @@ which fails because our existing code only returns a single number.  We are <spa
 
 This is a bit trickier than the earlier task, because we want to break up the
 open frames into separate groups before we reduce it with a sum.  Happily, Rx has operators
-for that, one of which is 
+for that, one of which is
 
 [`windowCount(2) Operator`](
 http://reactivex.io/rxjs/class/es6/Observable.js~Observable.html#instance-method-windowCount).
 <center><img src="http://reactivex.io/rxjs/img/windowCount.png" width="600px"></center>
 
 
-This operator will take a stream, and break it up into substreams each of 
-which has two elements, so that we can operate on each substream separately.  
-If there are an even number of elements, an additional empty stream 
-appears at the end, and if there are an odd number of elements, 
+This operator will take a stream, and break it up into substreams each of
+which has two elements, so that we can operate on each substream separately.
+If there are an even number of elements, an additional empty stream
+appears at the end, and if there are an odd number of elements,
 then the last element of the stream is added as a singleton stream with the last
 element.  What we have is a resulting stream of streams, each of which we can `reduce`.
 
-The problem is that we want to have a flattened stream of the resulting 
+The problem is that we want to have a flattened stream of the resulting
 reductions, and there is an operator for that too:
 [`mergeMap Operator`](http://reactivex.io/rxjs/class/es6/Observable.js~Observable.html#instance-method-mergeMap).
 Folks familiar with other functional languages may recognize this as a function
@@ -347,7 +348,7 @@ We now write:
 
 
 ```typescript
-const frameScorer = frame => frame.reduce(sum); 
+const frameScorer = frame => frame.reduce(sum);
 return roll$
   .windowCount(2)
   .mergeMap(frameScorer);
@@ -426,20 +427,20 @@ that, the `bufferCount`.
 
 We have a few steps to solve this puzzle.  The first is to figure out
 how to "look ahead" to the next frame, and then to parse that frame
-for the result.  Again, we exploit a special Rxjs operator: 
+for the result.  Again, we exploit a special Rxjs operator:
 [`bufferCount Operator`](
 http://reactivex.io/rxjs/class/es6/Observable.js~Observable.html#instance-method-bufferCount).
 <center><img src="http://reactivex.io/rxjs/img/bufferCount.png" width="600px"></center>
 
 This reduces a stream of values into a stream of arrays, of the length passed in
 as the first parameter.  If a second parameter is given, then the next array starts
-that many items after the last one.  Thus for the example stream in our test: 
+that many items after the last one.  Thus for the example stream in our test:
 `--5--5--9--|`, bufferCount(3,1)
 results in the stream: `--[5,5,9]--[5,9]--[9]--`.  Then, we break that stream
 up into the observable of observables, the first one having the first two
 elements `--[5,5,9]--[5,9]--`, and the second one having the remainder `--[9]--`
 
-Then, to score a substream (we call them frames), we pick off the first triplet 
+Then, to score a substream (we call them frames), we pick off the first triplet
 of that substream and check to see if its a spare.  If so, we add all three
 elements, otherwise we add the first two, as we would for any open frame.
 
@@ -487,7 +488,7 @@ const frameScorer = frame =>
     );
 ```
 
-which solves part of the problem, not outputting 13 for the first frame, 
+which solves part of the problem, not outputting 13 for the first frame,
  but doesn't solve the miscounting of the second one.
 
 The problem is that while we are still breaking up every frame into two
@@ -498,7 +499,7 @@ frames into 1 or two rolls, depending on whether they are strikes or
 non-strikes.  The `windowCount` operator doesn't cut it here.
 
 But Rx has another operator that will suit us fine, after a bit of
-preprocessing.  Consider the 
+preprocessing.  Consider the
 
 [`groupBy`](http://reactivex.io/rxjs/class/es6/Observable.js~Observable.html#instance-method-groupBy) operator.
 <center><img src="http://reactivex.io/rxjs/img/groupBy.png" width="600px"></center>
@@ -509,7 +510,7 @@ preprocess the stream of triplets into a stream of objects of the form:
 
 {frame: <framenumber> pins: <triplet>}
 
-we can use `groupBy(x => x.frame)` will break the stream into substreams by frame. 
+we can use `groupBy(x => x.frame)` will break the stream into substreams by frame.
 
 We begin by restructuring the sequence
 
@@ -611,7 +612,7 @@ return roll$
 
 and we are <span style="color: green">green</span>, then we <span style="color: orange">refactor</span>!  This yields a rather pretty piece of code that looks like
 it was designed by first and coded top-down.  Agreed it is pretty.  What do you
-think? 
+think?
 
 ```typescript
 roll$
@@ -634,7 +635,7 @@ function scoreFrames(frame$) {
 }
 
 function cleanPartials(score$) {
-  return score$  
+  return score$
     .filter(score => !isNaN(score))
     .take(10)
 }
@@ -680,7 +681,7 @@ depending upon whether or not roll$ is empty.  It turns out there is an operator
 that can handle this case.  `Rxjs` has a
 [`defaultIfEmpty Operator`](http://reactivex.io/rxjs/class/es6/Observable.js~Observable.html#instance-method-defaultIfEmpty)
 <center><img src="http://reactivex.io/rxjs/img/defaultIfEmpty.png" width="600px"></center>
- 
+
 ```typescript
 return roll$
   .mapTo('-')
@@ -740,7 +741,7 @@ roll$
       ' X' :
     pins === 0 ?
       '-' :
-    pins.toString(); 
+    pins.toString();
   )
   .defaultIfEmpty('');
 ```
@@ -753,7 +754,7 @@ const displayOneRoll = (pins) =>
     ' X' :
   pins === 0 ?
     '-' :
-  pins.toString(); 
+  pins.toString();
 
 roll$
   .map(displayOneRoll)
@@ -772,7 +773,7 @@ const displayOneRoll = (pins) =>
     ' X' :
   pins === 0 ?
     '-' :
-  pins.toString(); 
+  pins.toString();
 
 roll$
   .reduce((display, roll) => display + displayOneRoll(roll), '')
@@ -789,7 +790,7 @@ const displayOneRoll = (pins) =>
     ' X' :
   isGutter(pins) ?
     '-' :
-  pins.toString(); 
+  pins.toString();
 
 const addPinToDisplay = (display, pins) => display + displayOneRoll(pins);
 
@@ -802,7 +803,7 @@ test('spare', testDisplay('-0-10|', '-/'));
 test('spare', testDisplay('-5-5|', '5/'));
 ```
 and we are <span style="color: red">red</span>!  To determine whether a roll yield
-a strike or a spare attempt, we will need the information from display in the 
+a strike or a spare attempt, we will need the information from display in the
 displayOneRoll code.  Basically, its a spare if its a spare attempt and the
 roll plus the pins from the last roll add to 10.  We begin with the obvious
 efforts, noting that the case `-0-10|` should result in `-/`:
@@ -810,14 +811,14 @@ efforts, noting that the case `-0-10|` should result in `-/`:
 ...
 const displayOneRoll = (display, pins) =>
 
-  display.length > 0 && 
+  display.length > 0 &&
     pins + (parseInt(display[display.length - 1]) || 0)  === 10  ?
     '/' :
   isStrike(pins) ?
     ' X' :
   isGutter(pins) ?
     '-' :
-  pins.toString(); 
+  pins.toString();
 
 const addPinToDisplay = (display, pins) => display + displayOneRoll(display, pins);
 ...
@@ -827,7 +828,7 @@ and we are <span style="color: green">green</span>, then we <span style="color: 
 ```typescript
 ...
 const lastRoll = display => parseInt(display[display.length - 1]) || 0;
-const isSpareAttempt = (display, pins) => display.length > 0 
+const isSpareAttempt = (display, pins) => display.length > 0
 const isSpare = (display, pins) =>
   isSpareAttempt(display, pins) && pins + lastRoll(display, pins) === 10;
 
@@ -838,7 +839,7 @@ const displayOneRoll = (display, pins) =>
     ' X' :
   isGutter(pins) ?
     '-' :
-  pins.toString(); 
+  pins.toString();
 
 const addPinToDisplay = (display, pins) => display + displayOneRoll(display, pins);
 ...

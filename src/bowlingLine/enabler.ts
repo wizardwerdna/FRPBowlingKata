@@ -1,6 +1,5 @@
 export function enabler(display, scores) {
-  const lastRoll = (display, scores) =>
-    parseInt(display[display.length - 1]) || 0;
+  const lastRoll = (display, scores) => +display[display.length - 1] || 0;
   const isSpareAttempt = (display, scores) =>
     display.length % 2 === 1 || display.length === 20;
   const isGameOver = (display, scores) =>

@@ -5,15 +5,17 @@ require('./CycleJS_Logo.png');
 require('./favicon.ico');
 
 export function view(model$) {
-  return model$.map(bowlingLines =>
-    div('.container', [
-      vTitle(),
-      ...bowlingLines,
-      vInput(),
-      vFooter(),
-    ])
-  );
+  return model$.map(bowlingLines => page(bowlingLines));
 };
+
+function page(bowlingLines) {
+  return div('.container', [
+    vTitle(),
+    ...bowlingLines,
+    vInput(),
+    vFooter(),
+  ]);
+}
 
 function vTitle() {
   return div('#title', [
@@ -34,6 +36,9 @@ function vInput() {
     label('.playerLabel', 'New Player:'),
     input('.playerInput', {
       props: {autofocus: true},
+      hook: {
+        update: (oldvNode, {elm}) => elm.value = ''
+      }
     })
   ]);
 }

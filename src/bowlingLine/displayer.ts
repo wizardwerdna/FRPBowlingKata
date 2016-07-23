@@ -1,5 +1,5 @@
 export function displayer$(roll$) {
-  const lastRoll = (display, roll) => parseInt(display[display.length - 1]) || 0;
+  const lastRoll = (display) => +display[display.length - 1] || 0;
   const isDoubleAttempt = (display, roll) =>
     display.length === 19 && display[18] === 'X';
   const isStrikeSpareAttempt = (display, roll) =>
@@ -9,7 +9,7 @@ export function displayer$(roll$) {
     (isOddRoll(display, roll) && !isDoubleAttempt(display, roll)) ||
       isStrikeSpareAttempt(display, roll);
   const isSpare = (display, roll) =>
-    isSpareAttempt(display, roll) && roll + lastRoll(display, roll) === 10;
+    isSpareAttempt(display, roll) && roll + lastRoll(display) === 10;
   const isGutter = (display, roll) => roll === 0;
   const isStrike = (display, roll) => roll === 10;
   const spaceUnlessTenth = (display) => display.length >= 18 ? '' : ' ';
