@@ -25,10 +25,6 @@ module.exports = env => {
           test: /\.(jpg|png)$/,
           loader: 'url?limit=100000'
         },
-        {
-          test: /\.(ico)$/,
-          loader: 'url?limit=0'
-        },
         { test: /\.ts$/, loader: 'ts-loader' },
         { test: /\.css$/, loader: 'style-loader!css-loader' }
       ],

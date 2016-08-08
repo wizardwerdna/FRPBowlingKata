@@ -13,9 +13,11 @@ adopt these terrific agile practices to change the world with your own
 examples and craftsmanship.
 
 
-<center><img src="https://raw.githubusercontent.com/wizardwerdna/FRPBowlingKata/master/Display.png" width="600px"></center>
+<center>[<img src="https://raw.githubusercontent.com/wizardwerdna/FRPBowlingKata/master/Display.png" width="600px">](http://wizardwerdna.github.io)</center>
 
 [Click here for a running version of the FRP Bowling application](http://wizardwerdna.github.io).
+
+[Click here for the source code and tests on Github](https://github.com/wizardwerdna/FRPBowlingKata/blob/master/README.md)
 
 The purpose is to demonstrate how to use Test First Development to execute the
 [Classical Bowling Kata](http://codingdojo.org/cgi-bin/index.pl?KataBowling).
@@ -40,6 +42,10 @@ rough drafts.
 | [03 - FRP Bowling - Displayer$](https://www.youtube.com/watch?v=nMk0bqDetqw) | TDD development of the displayer$, which transforms a stream of rolls into a singleton stream of a string representing the display of the stream of rolls. |
 | [04 - FRP Bowling - Enabler](https://www.youtube.com/watch?v=CsGYNkLjtbI) | TDD development of the enabler, which, given an array of scores from the scorer$ and  string from the displayer$, determines which roll buttons are to be disableto be disabled. |
 | [05 - CycleJS Static DOM Display](https://www.youtube.com/watch?v=zc6TyL5TK2g) | TDD development of the view for a bowling line  component of a CycleJS Application |
+| 06 - MVI Component Feature | Strategy for TDD development of a CycleJ Application Component using MVI |
+| 07 - BowlingLine Feature | TDD development of a BowlingLine Component |
+| 08 - Mainline Feature Using Component List | Development of an Application Providing a List of BowlingLine Components |
+| 09 - Deletion Feature | Linking Component and Mainline to implement Deletion Feature |
 
 The key functional parts built with corresponding unit tests are:
 

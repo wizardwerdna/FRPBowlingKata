@@ -1,20 +1,14 @@
-import {a, img, input, label, span, h1, h3, div} from '@cycle/dom';
-require('./styles.css');
-require('./Rx_Logo_S.png');
-require('./CycleJS_Logo.png');
-require('./favicon.ico');
+import {a, div, h1, h3, img, input, label, span} from '@cycle/dom';
 
 export function view(model$) {
-  return model$.map(bowlingLines => page(bowlingLines));
-};
-
-function page(bowlingLines) {
-  return div('.container', [
-    vTitle(),
-    ...bowlingLines,
-    vInput(),
-    vFooter(),
-  ]);
+  return model$.map(bowlingLines =>
+    div('.container', [
+      vTitle(),
+      ...bowlingLines,
+      vInput(),
+      vFooter()
+    ])
+  );
 }
 
 function vTitle() {
@@ -34,8 +28,8 @@ function vTitle() {
 function vInput() {
   return div('#input', [
     label('.playerLabel', 'New Player:'),
-    input('.playerInput', {
-      props: {autofocus: true},
+    input('.name', {
+      props: {type: 'text', autofocus: true},
       hook: {
         update: (oldvNode, {elm}) => elm.value = ''
       }

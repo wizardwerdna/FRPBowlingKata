@@ -1,15 +1,24 @@
-import {intent} from './intent';
-import {model} from './model';
-import {view} from './view';
+import {view as viewFn} from './view';
+import {model as modelFn} from './model';
+import {intent as intentFn} from './intent';
 
-export function BowlingLine({DOM, props$}) {
+// return {DOM: sources |> intent |> model |> view|
+export function BowlingLine(
+  sources,
+  model = modelFn, view = viewFn, intent = intentFn
+) {
+  const action$ = intent(sources.DOM);
+  const model$ = model(action$, sources.props$);
+  const vtree$ = view(model$);
+  const delete$ = deleteActions(action$, sources.props$);
+  return {DOM: vtree$, Delete: delete$};
+}
 
-  const actions$ = intent(DOM, props$);
-  const model$ = model(actions$, props$);
-  const vdom$ = view(model$);
-  const deleters$ = actions$
-    .filter((action: any) => action.type === 'DELETE');
-  vdom$.subscribe( x => console.log(x));
-  return {DOM: vdom$, Delete: deleters$};
-
+function deleteActions(action$, props$) {
+  return action$
+    .filter((action: any) => action.type === 'DELETE')
+    .combineLatest(
+      props$,
+      (action, props: any) => ({type: 'DELETE', payload: props.id})
+    );
 }

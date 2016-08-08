@@ -1,5 +1,7 @@
-import {Observable} from 'rxjs';
-
+import {Observable as O} from 'rxjs';
+import {div, mockDOMSource} from '@cycle/dom';
+import RxJSAdapter from '@cycle/rxjs-adapter';
+//
 // test driver global state shared among all tests
 export const initTestData = {
   run : 0,
@@ -96,7 +98,7 @@ export function assertEqual(expected, actual, negated = false) {
 }
 
 export function assertMarble(
-  expected: string, str$: Observable<any>, negated = false
+  expected: string, str$: O<any>, negated = false
 ) {
   data.run++;
   str2mbl$(str$).subscribe(
@@ -116,7 +118,7 @@ export function assertMarble(
 }
 
 export function assertStreamOf(
-  expected, stream$: Observable<any>, negated = false
+  expected, stream$: O<any>, negated = false
 ) {
   if (!stream$) { throw('stream is not defined'); };
   if (typeof stream$.subscribe !== 'function') {
@@ -125,7 +127,7 @@ export function assertStreamOf(
   stream$.subscribe(
     actual => {
       data.run++;
-      if (expected === actual) {
+      if (JSON.stringify(expected) === JSON.stringify(actual)) {
         markPass1('%cstream contains expected value %o', expected, negated);
       } else {
         markPass2('%cstream contained %o, NOT the expected value %o',
@@ -140,7 +142,7 @@ export function assertStreamOf(
   );
 }
 
-export function str2mbl$(stream$: Observable<any>): Observable<string> {
+export function str2mbl$(stream$: O<any>): O<string> {
   if (!stream$) { throw('Undefined is not a stream'); };
   if (typeof stream$.subscribe !== 'function') {
     throw(stream$, 'is not a stream');
@@ -151,8 +153,8 @@ export function str2mbl$(stream$: Observable<any>): Observable<string> {
     .map(mbl => '-' + mbl + '|');
 }
 
-export function mbl2str$(mbl: string): Observable<any> {
-  return Observable.from(
+export function mbl2str$(mbl: string): O<any> {
+  return O.from(
     mbl
       .replace(/--+/g, '-')
       .replace(/[ |]/g, '')
@@ -162,4 +164,83 @@ export function mbl2str$(mbl: string): Observable<any> {
       .filter(each => each !== '')
       .map(each => isNaN(parseInt(each)) ? each : parseInt(each))
   );
+}
+
+// From: http://staltz.com/unidirectional-user-interface-architectures.html
+//
+// Introduced as a fully reactive unidirectional architecture based on RxJS 
+// Os, Model-View-Intent is the primary architectural pattern in the 
+// framework Cycle.js. The O event stream is a primitive used everywhere,
+// and functions over Os are pieces of the architecture.
+//
+// Parts:
+//
+// Intent: function from O of user events to O of “actions”
+// Model: function from O of actions to O of state
+// View: function from O of state to O of rendering
+// Custom element: subsection of the rendering which is in itself a UI program. 
+// May be implemented as MVI, or as a Web Component. Is optional to use in a View.
+
+export function assertMVIComponent(Component) {
+  const nullModel = (action$, ...rest) => O.of([]);
+  const nullView = (model$, ...rest) => O.empty();
+  const nullIntent = (DOMSource, ...rest) => O.of({});
+
+  return function() {
+
+    test('component provides model, view and intent, each called once', function() {
+      let visits = {
+        model: 0,
+        view: 0,
+        intent: 0
+      };
+      Component({}, model, view, intent);
+      function model() { visits.model++; return O.of([]); }
+      function view() { visits.view++; return O.empty(); }
+      function intent() { visits.intent++; return O.empty(); }
+      expect(visits).toEqual({model: 1, view: 1, intent: 1});
+    });
+
+    test('intent is function from DOMSource to observable of actions', function() {
+      const DOM = mockDOMSource(RxJSAdapter, {
+        '.foo': {
+          'click': O.of({target: {innerHTML: '123'}})
+        }
+      });
+      Component({DOM}, nullModel, nullView, intent);
+      function intent(DOMSource, ...rest) {
+        const rollButton$ = DOMSource.select('.foo').events('click');
+        expect(rollButton$.map(evt => evt.target.innerHTML)).toBeStreamOf('123');
+        return O.empty();
+      }
+    });
+
+    test('model is function from actions$ to observable of models', function() {
+      ['first action', 'second action'].forEach(expected => {
+        const intent = (sources, ...rest) => O.of(expected);
+        Component({}, model, nullView, intent);
+
+        function model(action$, ...rest) {
+          expect(action$).toBeStreamOf(expected);
+        }
+      });
+    });
+
+    test('view is function from model$ to observable of renderings', function() {
+      [div('first'), div('second')].forEach(expected => {
+        const model = (actions$, ...rest) => O.of(expected);
+        Component({}, model, view, nullIntent);
+
+        function view(model$, ...rest) {
+          expect(model$).toBeStreamOf(expected);
+        }
+      });
+    });
+
+    test('component returns object with DOM attribute as stream from view', () => {
+      const testView = (model$: O<any>) => O.of(div('testDOM'));
+      expect(Component({}, nullModel, testView, nullIntent).DOM)
+        .toBeStreamOf(div('testDOM'));
+    });
+  };
 }

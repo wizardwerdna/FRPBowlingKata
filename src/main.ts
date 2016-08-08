@@ -1,25 +1,31 @@
-import {model} from './model';
-import {view} from './view';
-import {intent} from './intent';
-import {BowlingLine} from './bowlingLine';
-import isolate from '@cycle/isolate';
-import {Observable as O, Subject} from 'rxjs';
+import {Observable as O} from 'rxjs';
+import {model as modelFn} from './model';
+import {view as viewFn} from './view';
+import {intent as intentFn} from './intent';
+import {Subject} from 'rxjs';
+import {BowlingLine as BowlingLineFn} from './bowlingLine';
+import isolateFn from '@cycle/isolate';
 
-export function main({DOM}) {
+export function main(
+  sources,
+  model = modelFn, view = viewFn, intent = intentFn,
+  makeBowlingLineWrapper = makeBowlingLineWrapperFn
+) {
+  const lineAction$ = new Subject();
+  const action$ = intent(sources.DOM, lineAction$);
+  const model$ = model(action$, makeBowlingLineWrapper(sources), lineAction$);
+  const vtree$ = view(model$);
+  return {DOM: vtree$};
+}
 
-  const proxy$ = new Subject();
-  const action$ = intent(DOM, proxy$);
-  const models = model(action$, makeBowlingLineWrapper(DOM));
-  models.Delete.subscribe(next => proxy$.next(next));
-  const vdom$ = view(models.DOM);
-  return {DOM: vdom$};
-
-  function makeBowlingLineWrapper(DOM) {
-    return function makeBowlingLine(name, id) {
-      const bowlingLine = isolate(BowlingLine)({
-        DOM: DOM, props$: O.of({name, id})
-      });
-      return bowlingLine;
-    };
-  }
+export function makeBowlingLineWrapperFn(
+  sources,
+  isolate = isolateFn,
+  BowlingLine = BowlingLineFn
+) {
+  return function makeBowlingLine(id: number, name: string) {
+    return isolate(BowlingLine)(
+      Object.assign({}, sources, {props$: O.of({id, name})})
+    );
+  };
 }

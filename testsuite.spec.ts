@@ -43,10 +43,12 @@ export function testTests() {
       expect(Observable.of(undefined)).toBeStreamOf(undefined);
       expect(Observable.of('here')).toBeStreamOf('here');
       expect(Observable.of(false)).toBeStreamOf(false);
+      expect(Observable.of([1, 2, 3])).toBeStreamOf([1, 2, 3]);
       expect(Observable.of(NaN)).not.toBeStreamOf(NaN);
       expect(Observable.of(undefined)).not.toBeStreamOf(NaN);
       expect(Observable.of('here')).not.toBeStreamOf(NaN);
       expect(Observable.of(false)).not.toBeStreamOf(true);
+      expect(Observable.of([1, 2, 3])).not.toBeStreamOf([1, 2, 3, 4]);
     });
   });
 

@@ -1,23 +1,20 @@
-import {hr, button, span, div} from '@cycle/dom';
+import {button, div, hr, span} from '@cycle/dom';
 import {enabler} from './enabler';
-require('../styles.css');
-require('../Rx_Logo_S.png');
-require('../favicon.ico');
 
 export function view(model$) {
-  return model$.map(([display, scores, props, pastLength, futureLength]) =>
+  return model$.map(([display, scores, enabledUndo, enabledRedo, props]) =>
     div({key: props.id}, [
       vPlayerName(props),
       vFrames(display, scores),
       vRollButtons(display, scores),
-      vActions(display, pastLength, futureLength),
+      vActions(display, enabledUndo, enabledRedo),
       hr()
     ])
   );
-};
+}
 
 function vPlayerName(props) {
-  return div( '.name', props.name.toString() );
+  return div('.name', props.name);
 }
 
 function vFrames(display, scores) {
@@ -25,33 +22,31 @@ function vFrames(display, scores) {
     ...Array(10).fill(0).map((_, frame) =>
       div('.frame', {class: {tenth: frame === 9}}, [
         ...Array(frame === 9 ? 3 : 2).fill(0).map((_, roll) =>
-          div('.rollDisplay', display[2 * frame + roll] || '')
+          div('.rollDisplay', display[2 * frame + roll])
         ),
-        div('.scoreDisplay', scores[frame])
+        div('.scoreDisplay', scores[frame] || '')
       ])
-    ),
+    )
   ]);
 }
 
 function vRollButtons(display, scores) {
-  return span('.rollButtons', [
+  return span('.rollbuttons', [
     ...Array(11).fill(0).map((_, pins) =>
       button(
         '.rollButton',
         {props: {disabled: pins > enabler(display, scores)}},
-        pins.toString())
+        pins
       )
+    )
   ]);
 }
 
-function vActions(display, pastLength, futureLength) {
+function vActions(display, enabledUndo, enabledRedo) {
   return span('.actions', [
-    button('.newgame',
-      {props: {disabled: display.length === 0}}, 'New'),
-    button('.undo',
-      {props: {disabled: pastLength <= 1}}, 'Undo'),
-    button('.redo',
-      {props: {disabled: futureLength === 0}}, 'Redo'),
+    button('.newgame', 'New'),
+    button('.undo', {props: {disabled: !enabledUndo}}, 'Undo'),
+    button('.redo', {props: {disabled: !enabledRedo}}, 'Redo'),
     button('.delete', 'X')
   ]);
 }

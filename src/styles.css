@@ -7,100 +7,11 @@ body {background-color: #eaeaea;}
   padding: 1pc;
 }
 
-#title {
-  padding-left: 2pc;
-  text-align: center;
-}
-
-#title a {
-  text-decoration: none;
-  padding-left: 1pc;
-  padding-right: 1pc;
-}
-
-#title a:visited {
-  color: black;
-}
-
-#footer {
-  padding-left: 2pc;
-  text-align: right;
-  font-size: small;
-}
-
-#footer a {
-  text-decoration: none;
-}
-
-#footer a:hover {
-  color: white;
-  background-color: green;
-}
-
-#title span {
-  padding-left: 0.5pc;
-  padding-right: 0.5pc;
-}
-
-img {
-  height: 40px;
-  width:  40px;
-}
 
 .name {
   font-weight: bolder;
 }
 
-button {
-  background-color: green;
-  color: white;
-  height: 20px;
-  width: 30px;
-  border: none;
-  padding: 3px;
-  margin: 1pt;
-}
-
-span.actions {
-  cloat: left;
-  margin-left: 2pc;
-}
-
-div.rollButtons {
-  float: left;
-  width: 130px;
-}
-
-button.rollButton {
-  width: 20px;
-}
-
-button.newgame {
-  background-color: red;
-  width: 40px;
-}
-button.newgame:disabled {background-color: lightgray}
-
-button.undo {
-  background-color: orange;
-  width: 40px;
-}
-button.undo:disabled {background-color: lightgray}
-
-button.redo {
-  background-color: green;
-  width: 40px;
-}
-button.redo:disabled {background-color: lightgray}
-
-button.delete {
-  background-color: red;
-  width: 40px;
-}
-
-button:disabled {
-  background-color: lightgray;
-}
 
 .frames{
   clear: both;
@@ -154,7 +65,63 @@ button:disabled {
   margin-top: 25px;
 }
 
-.playerInput {
+/* BowlingLine Buttons */
+
+button {
+  background-color: green;
+  color: white;
+  height: 20px;
+  width: 30px;
+  border: none;
+  padding: 3px;
+  margin: 1pt;
+}
+
+span.actions {
+  cloat: left;
+  margin-left: 2pc;
+}
+
+div.rollButtons {
+  float: left;
+  width: 130px;
+}
+
+button.rollButton {
+  width: 20px;
+}
+
+button.newgame {
+  background-color: red;
+  width: 40px;
+}
+button.newgame:disabled {background-color: lightgray}
+
+button.undo {
+  background-color: orange;
+  width: 40px;
+}
+button.undo:disabled {background-color: lightgray}
+
+button.redo {
+  background-color: green;
+  width: 40px;
+}
+button.redo:disabled {background-color: lightgray}
+
+button.delete {
+  background-color: red;
+  width: 40px;
+}
+
+button:disabled {
+  background-color: lightgray;
+}
+
+
+/* header/footer */
+
+input.name {
   float: left;
 }
 
@@ -162,4 +129,44 @@ button:disabled {
   padding-right: 5px;
   float: left;
   font-size: small;
+}
+
+#title {
+  padding-left: 2pc;
+  text-align: center;
+}
+
+#title a {
+  text-decoration: none;
+  padding-left: 1pc;
+  padding-right: 1pc;
+}
+
+#title a:visited {
+  color: black;
+}
+
+#footer {
+  padding-left: 2pc;
+  text-align: right;
+  font-size: small;
+}
+
+#footer a {
+  text-decoration: none;
+}
+
+#footer a:hover {
+  color: white;
+  background-color: green;
+}
+
+#title span {
+  padding-left: 0.5pc;
+  padding-right: 0.5pc;
+}
+
+img {
+  height: 40px;
+  width:  40px;
 }

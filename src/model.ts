@@ -1,59 +1,49 @@
 import {Observable as O} from 'rxjs';
-
-export function model(action$, makeBowlingLine) {
+export function model(action$, makeBowlingLine, lineAction$) {
+  const initialState = {lastid: 0, list: [], listID: []};
 
   const reducer$ = O.merge(
+    action$
+      .filter(action => action.type === 'ADD ITEM')
+      .map(action =>
+        function addLineReducer(state) {
+          return {
+            lastid: state.lastid + 1,
+            list: [...state.list, {
+              id: state.lastid + 1,
+              line: makeBowlingLine(state.lastid + 1, action.payload)
+            }]
+          };
+        }
+      ),
 
     action$
-      .filter(action => action.type === 'ADDPLAYER')
-      .map(action => function addPlayerReducer(state) {
-        const newLine =
-          makeBowlingLine(action.payload, state.lastid + 1);
-        return {
-          lastid: state.lastid + 1,
-          lines: state.lines.concat({
-            id: state.lastid + 1,
-            lineItem: newLine
-          })
-        };
-      }),
-
-    action$
-      .filter(action => action.type === 'DELETEPLAYER')
-      .map(action => function deletePlayerReducer(state) {
-        return {
-          lastid: state.lastid,
-          lines: state.lines.filter(line =>
-            line.id !== action.payload
-          )
-        };
-      })
-
+      .filter(action => action.type === 'DELETE ITEM')
+      .map(action =>
+        function deleteLineReducer(state) {
+          return {
+            lastid: state.lastid,
+            list: state.list.filter(item => item.id !== action.payload)
+          };
+        }
+      )
   );
+  const state$ = reducer$
+    .scan((state, reducer: any) => reducer(state), initialState)
+    .share();
 
-  const initialState = { lastid: 0, lines: [] };
+  const DOMState$ = state$
+    .map(state => O.combineLatest(
+      ...state.list.map(listItem => listItem.line.DOM)
+    ).defaultIfEmpty([])).switch()
+    .startWith([]);
 
-  const state$ =
-    reducer$
-      .scan((state, next: any) => next(state), initialState)
-      .share();
+  state$
+    .map(state => O.merge(
+      ...state.list.map(listItem => listItem.line.Delete)
+    ))
+    .switch()
+    .subscribe(next => lineAction$.next(next));
 
-  const bowlingLinesDOM$ = state$.map(state =>
-    state.lines.map(line => line.lineItem.DOM)
-  );
-
-  const bowlingLinesDelete$ = state$
-    .map(state => lineItemDeleteAction$(state))
-    .switch();
-
-  return {
-    DOM: bowlingLinesDOM$.startWith(null),
-    Delete: bowlingLinesDelete$
-  };
-
-  function lineItemDeleteAction$(state) {
-    return O.merge(
-      ...state.lines.map(line => line.lineItem.Delete)
-    );
-  }
+  return DOMState$;
 }
