@@ -28,6 +28,7 @@ export function model(action$, makeBowlingLine, lineAction$) {
         }
       )
   );
+
   const state$ = reducer$
     .scan((state, reducer: any) => reducer(state), initialState)
     .share();
@@ -38,12 +39,22 @@ export function model(action$, makeBowlingLine, lineAction$) {
     ).defaultIfEmpty([])).switch()
     .startWith([]);
 
-  state$
+  lineAction$.let(imitate(
+    state$.let(lineDeleter$)));
+
+  return DOMState$;
+}
+
+function imitate(subject$) {
+  return function (object$) {
+    return object$.subscribe(next => subject$.next(next));
+  };
+}
+
+function lineDeleter$(state$) {
+  return state$
     .map(state => O.merge(
       ...state.list.map(listItem => listItem.line.Delete)
     ))
-    .switch()
-    .subscribe(next => lineAction$.next(next));
-
-  return DOMState$;
+    .switch();
 }
