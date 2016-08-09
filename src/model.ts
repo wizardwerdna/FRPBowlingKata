@@ -45,8 +45,8 @@ export function model(action$, makeBowlingLine, lineAction$) {
   return DOMState$;
 }
 
-function imitate(subject$) {
-  return function (object$) {
+function imitate(object$) {
+  return function (subject$) {
     return object$.subscribe(next => subject$.next(next));
   };
 }

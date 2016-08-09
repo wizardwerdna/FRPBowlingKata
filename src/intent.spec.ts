@@ -9,7 +9,7 @@ export function intentTests() {
     const DOM = mockDOMSource(RxJSAdapter, {});
     expect(intent(DOM, O.empty()).isEmpty()).toBeStreamOf(true);
   });
-  test('CR, but having only white space', function() {
+  test('NO ACTION, CR, but having only white space', function() {
     const DOM = mockDOMSource(RxJSAdapter, {
       'input.name': {
         'keydown': O.of({
@@ -20,7 +20,7 @@ export function intentTests() {
     });
     expect(intent(DOM, O.empty()).isEmpty()).toBeStreamOf(true);
   });
-  test('CR having both text and white space', function() {
+  test({type: 'ADD ITEM', payload: 'Andrew Greenberg'}, function() {
     const DOM = mockDOMSource(RxJSAdapter, {
       'input.name': {
         'keydown': O.of({
@@ -33,7 +33,7 @@ export function intentTests() {
       {type: 'ADD ITEM', payload: 'Andrew Greenberg'}
     );
   });
-  test('Delete Item', function() {
+  test({type: 'DELETE ITEM', payload: 11}, function() {
     const DOM = mockDOMSource(RxJSAdapter, {});
     const mockBLaction$ = O.of({type: 'DELETE', payload: 11});
 

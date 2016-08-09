@@ -78,4 +78,19 @@ export function modelTests() {
       vtree(1, 'Andrew')
     ]);
   });
+
+  test('Handle bowlingLine with Delete', function() {
+    const  testDeleter = { type: 'DELETE', payload: 7 };
+    function mockMakeBowlingLine(id, name) {
+      return {DOM: O.of(div()), Delete: O.of(testDeleter)};
+    }
+    const mockLineAction$ = new Subject();
+    mockLineAction$.subscribe(
+      x => expect(x).toEqual(testDeleter)
+    );
+
+    model(O.from([
+      {type: 'ADD ITEM', payload: 'Andrew'}
+    ]), mockMakeBowlingLine, mockLineAction$);
+  });
 }
